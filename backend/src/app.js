@@ -27,9 +27,10 @@ app.use(cookieParser());
 
 import authRoutes from "./routes/auth.route.js";
 import eventRoutes from "./routes/event.route.js";
-
+import certificateRoutes from "./routes/certificate.route.js";
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/events", eventRoutes);
+app.use("/api/v1/certificates", certificateRoutes);
 
 export { app }

@@ -4,7 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Registration } from "../models/registration.model.js";
-
+import { User } from "../models/user.model.js";
 
 const createEvent = asyncHandler(async (req, res) => { 
     const { title, description, location, eventTime, category, organizingClub } = req.body;
@@ -155,6 +155,11 @@ const registerToEvent = asyncHandler(async (req, res) => {
     if (existingRegistration) {
         throw new ApiError(400, "You have already registered for this event");
     }
+
+    await User.findByIdAndUpdate(req.user._id, {
+        studentId,
+        department
+    }, { new: true });
 
     const registration = await Registration.create({
         user: req.user._id,
