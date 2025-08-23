@@ -6,6 +6,7 @@ import AboutUs from "../components/About/AboutUs";
 import PrivacyPolicy from "../pages/Privaacy/Privaacy.jsx";
 import Contact from "../components/Contact/Contact.jsx";
 import Profile from "../pages/Profile/Profile.jsx";
+import VerifyOTP from "../pages/Register/Verifyotp.jsx";
 const mainRoutes = [
   <Route key="home" path="/" element={<Homepage />} />,
   <Route key="login" path="/login" element={<LoginPage />} />,
@@ -14,6 +15,7 @@ const mainRoutes = [
   <Route key="privacy" path="/privacy" element={<PrivacyPolicy />} />,
   <Route key="contact" path="/contact" element={<Contact />} />,
   <Route key="profile" path="/profile" element={<Profile />} />,
+  <Route key="verify-otp" path="/verify-otp" element={<VerifyOTP />} />,
 ];
 
 export default mainRoutes;

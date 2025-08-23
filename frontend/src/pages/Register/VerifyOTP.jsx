@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import api from "@/lib/api";
+import api from "../../lib/api";
 
 const VerifyOTP = () => {
     const [otp, setOtp] = useState("");
@@ -12,7 +12,7 @@ const VerifyOTP = () => {
     const handleVerify = async (e) => {
         e.preventDefault();
         try {
-            await api.post("/users/verify-otp", { email, otp });
+            await api.post("/auth/verify-otp", { email, otp });
             alert("Account verified successfully!");
             navigate("/login");
         } catch (err) {
