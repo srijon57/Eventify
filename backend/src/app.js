@@ -26,7 +26,10 @@ app.use(cookieParser());
 // ROUTERS
 
 import authRoutes from "./routes/auth.route.js";
+import eventRoutes from "./routes/event.route.js";
 
-app.use("/api/v1/auth", authRoutes); 
+
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/events", eventRoutes);
 
 export { app }
