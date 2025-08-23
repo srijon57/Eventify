@@ -1,95 +1,100 @@
-import  "react";
+import React from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import HeroImage from "@/assets/Hero.jpg";
 
-const HomePage = () => {
-    return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
-            <header className="w-full bg-blue-600 text-white py-6">
-                <h1 className="text-4xl font-bold text-center">
-                    HACKATHON PROJECT: Eventify - University Club Event
-                    Management Platform
-                </h1>
-            </header>
-            <main className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-6">
-                <section className="mb-6">
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                        Problem Statement
-                    </h2>
-                    <p className="text-gray-600">
-                        Create a full-stack web application called "Eventify" —
-                        an event management portal specially designed for
-                        university clubs. It allows club admins to organize
-                        events and students to register and view them. Students
-                        will build a functional, user-friendly web platform
-                        using a tech stack of their choice.
-                    </p>
-                </section>
-                <section className="mb-6">
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                        User Roles
-                    </h2>
-                    <ul className="list-disc list-inside text-gray-600">
-                        <li>Student: can browse and register for events.</li>
-                        <li>
-                            Club Admin: can add, edit, or delete events and
-                            manage attendees.
-                        </li>
-                    </ul>
-                </section>
-                <section className="mb-6">
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                        Core Features (MVP)
-                    </h2>
-                    <div className="space-y-4">
-                        <div>
-                            <h3 className="text-xl font-medium text-gray-700">
-                                Authentication
-                            </h3>
-                            <ul className="list-disc list-inside text-gray-600 ml-4">
-                                <li>Signup/Login system</li>
-                                <li>Role-based access (Student, Admin)</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-medium text-gray-700">
-                                Student Features:
-                            </h3>
-                            <ul className="list-disc list-inside text-gray-600 ml-4">
-                                <li>View upcoming events</li>
-                                <li>Register/Unregister from an event</li>
-                                <li>
-                                    Personal dashboard showing registered events
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-medium text-gray-700">
-                                Admin Features:
-                            </h3>
-                            <ul className="list-disc list-inside text-gray-600 ml-4">
-                                <li>Create new events</li>
-                                <li>Edit/Delete existing events</li>
-                                <li>View attendee list for each event</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <div className="text-center">
-                    <a
-                        href="/login"
-                        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300"
-                    >
-                        Login
-                    </a>
-                    <a
-                        href="/register"
-                        className="bg-green-600 text-white px-6 py-3 rounded-lg ml-4 hover:bg-green-700 transition duration-300"
-                    >
-                        Register
-                    </a>
-                </div>
-            </main>
+const events = [
+  { title: "Tech Meetup 2024", description: "Join us for a day of innovation and networking." },
+  { title: "Web Dev Workshop", description: "Learn the latest trends in web development." },
+  { title: "AI & Machine Learning", description: "An introduction to AI, with hands-on labs." },
+  { title: "Startup Pitch Night", description: "Pitch your ideas to top investors and mentors." },
+  { title: "Blockchain Seminar", description: "Explore blockchain technology and its applications." },
+];
+
+export default function HomePage() {
+  return (
+    <div className="flex flex-col items-center justify-start min-h-screen p-6 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      
+      {/* Hero Section */}
+      <motion.section
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="text-center max-w-4xl mb-12"
+      >
+        <h1 className="text-5xl font-extrabold mb-4">Welcome to Eventify</h1>
+        <p className="text-gray-600 dark:text-gray-300 text-lg">
+          Discover and join the latest tech events, workshops, and meetups near you.
+        </p>
+        <div className="mt-6">
+          <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
+            <Button variant="default" size="lg">Explore Events</Button>
+          </motion.div>
         </div>
-    );
-};
+        <motion.img
+          src={HeroImage}
+          alt="Event Hero"
+          className="mt-8 w-full max-w-3xl rounded-xl shadow-lg"
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1 }}
+        />
+      </motion.section>
 
-export default HomePage;
+      {/* Featured Events */}
+      <section className="w-full max-w-6xl">
+        <h2 className="text-3xl font-semibold mb-6">Featured Events</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.map((event) => (
+            <motion.div
+              key={event.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.12)" }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+            >
+              <Card className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-gray-900 dark:text-gray-100">{event.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-500 dark:text-gray-300 mb-4">{event.description}</p>
+                  <div className="flex justify-end">
+                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
+                      <Button>View Details</Button>
+                    </motion.div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Newsletter / Call-to-Action */}
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-16 w-full max-w-4xl bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md text-center border border-gray-200 dark:border-gray-700"
+      >
+        <h2 className="text-2xl font-semibold mb-4">Stay Updated</h2>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
+          Subscribe to our newsletter to get the latest events directly in your inbox.
+        </p>
+        <form className="flex flex-col sm:flex-row gap-4 justify-center">
+          <input
+            type="email"
+            placeholder="Enter your email"
+            className="px-4 py-2 border rounded-md flex-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+          />
+          <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
+            <Button>Subscribe</Button>
+          </motion.div>
+        </form>
+      </motion.section>
+    </div>
+  );
+}
