@@ -9,7 +9,7 @@ const Register = () => {
   const handleRegister = (e) => {
     e.preventDefault();
     console.log("Register submitted");
-    navigate("/"); // redirect to homepage after register
+    navigate("/"); 
   };
 
   const handleProfilePicChange = (e) => {

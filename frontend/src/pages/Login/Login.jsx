@@ -8,7 +8,7 @@ const Login = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     console.log("Login submitted");
-    navigate("/"); // redirect to homepage after login
+    navigate("/"); 
   };
 
   return (
