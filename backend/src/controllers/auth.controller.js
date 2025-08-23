@@ -185,7 +185,6 @@ const getCurrentUser = asyncHandler( async(req, res) => {
 
 const changePassword = asyncHandler(async(req, res) => {
     
-
     const {oldPassword, newPassword} = req.body;
 
     const user = await User.findById(req.user?._id);
@@ -208,6 +207,78 @@ const changePassword = asyncHandler(async(req, res) => {
 
 })
 
+const updateAccountDetails = asyncHandler(async (req, res) => {
+    const { username, email } = req.body;
+
+    // 1️⃣ Validate input
+    if (!username?.trim() && !email?.trim()) {
+        throw new ApiError(400, "At least one field (username or email) is required");
+    }
+
+    // 2️⃣ Prepare update object
+    const updateData = {};
+    if (username?.trim()) updateData.username = username.trim().toLowerCase();
+    if (email?.trim()) updateData.email = email.trim().toLowerCase();
+
+    // 3️⃣ Check if email/username already exists (if provided)
+    if (updateData.email) {
+        const existingEmailUser = await User.findOne({ email: updateData.email, _id: { $ne: req.user._id } });
+        if (existingEmailUser) throw new ApiError(409, "Email is already taken");
+    }
+    if (updateData.username) {
+        const existingUsernameUser = await User.findOne({ username: updateData.username, _id: { $ne: req.user._id } });
+        if (existingUsernameUser) throw new ApiError(409, "Username is already taken");
+    }
+
+    // 4️⃣ Update user
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        { $set: updateData },
+        { new: true }
+    ).select("-password");
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    // 5️⃣ Response
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "Details updated successfully"));
+});
+
+const updateUserAvatar = asyncHandler( async(req, res) => {
+
+    const avatarLocalPath = req.file?.path;
+
+    if(!avatarLocalPath){
+        throw new ApiError(400, "Avatar file is missing")
+    }
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+    if(!avatar.url){
+        throw new ApiError(400, "Error while uploading in cloudinary")
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set:{
+                avatar: avatar.url
+            } 
+        },
+        {new : true}
+    ).select("-password")
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, user,  "Avatar Changed Successfully")
+    )
+})
+
+
 export {
     registerUser,
     refreshAccessToken,
@@ -215,5 +286,7 @@ export {
     loginUser,
     logoutUser,
     getCurrentUser,
-    changePassword
+    changePassword,
+    updateAccountDetails,
+    updateUserAvatar    
 }
