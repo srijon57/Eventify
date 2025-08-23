@@ -9,7 +9,8 @@ import {
     changePassword,
     updateAccountDetails,
     updateUserAvatar,
-    verifyOTP
+    verifyOTP,
+    googleLogin,
 } from "../controllers/auth.controller.js";
 
 import { upload } from "../middlewares/multer.middleware.js"
@@ -33,6 +34,6 @@ router.route("/update-account").patch(verifyJWT, upload.none(), updateAccountDet
 router.route("/update-avatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
 
 router.post("/refresh-token", refreshAccessToken);
-
+router.route("/google").post(googleLogin);
 
 export default router;

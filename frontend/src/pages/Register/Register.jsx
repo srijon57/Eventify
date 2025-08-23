@@ -51,7 +51,7 @@ const Register = () => {
                         name="username"
                         placeholder="Name"
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         required
                     />
                     <input
@@ -59,7 +59,7 @@ const Register = () => {
                         name="email"
                         placeholder="Email"
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         required
                     />
                     <input
@@ -67,7 +67,7 @@ const Register = () => {
                         name="password"
                         placeholder="Password"
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         required
                     />
                     <input
@@ -75,29 +75,44 @@ const Register = () => {
                         name="studentId"
                         placeholder="Student ID"
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <select
                         name="department"
                         onChange={handleChange}
-                        className="w-full px-4 py-2 border rounded-lg"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
-                        <option>CSE</option>
-                        <option>EEE</option>
-                        <option>ME</option>
-                        <option>CE</option>
+                        <option className="bg-white dark:bg-gray-700">
+                            CSE
+                        </option>
+                        <option className="bg-white dark:bg-gray-700">
+                            EEE
+                        </option>
+                        <option className="bg-white dark:bg-gray-700">ME</option>
+                        <option className="bg-white dark:bg-gray-700">CE</option>
                     </select>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setProfilePic(e.target.files[0])}
-                        className="w-full"
-                    />
+                    <div className="relative border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
+                        <label
+                            htmlFor="profile-pic-upload"
+                            className="w-full py-2 px-4 cursor-pointer text-gray-500 dark:text-gray-400 block"
+                        >
+                            {profilePic
+                                ? profilePic.name
+                                : "Choose a profile picture"}
+                        </label>
+                        <input
+                            id="profile-pic-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setProfilePic(e.target.files[0])}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                    </div>
                     {profilePic && (
                         <img
                             src={URL.createObjectURL(profilePic)}
                             alt="Preview"
-                            className="mt-2 w-20 h-20 object-cover rounded-full border"
+                            className="mt-2 w-20 h-20 object-cover rounded-full border border-gray-300 dark:border-gray-600"
                         />
                     )}
                     <Button type="submit" className="w-full py-2 text-lg">

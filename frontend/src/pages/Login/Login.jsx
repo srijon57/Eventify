@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import api from "../../lib/api";
@@ -15,15 +15,55 @@ const Login = () => {
         try {
             const res = await api.post("/auth/login", { email, password });
             localStorage.setItem("token", res.data.data.accessToken);
-
             const userRes = await api.get("/auth/current-user");
             setUser(userRes.data.data);
-
             navigate("/");
         } catch (err) {
             alert(err.response?.data?.message || "Login failed");
         }
     };
+
+    const handleGoogleLogin = async (credentialResponse) => {
+        try {
+            const res = await api.post("/auth/google", {
+                idToken: credentialResponse.credential,
+            });
+            localStorage.setItem("token", res.data.data.accessToken);
+            const userRes = await api.get("/auth/current-user");
+            setUser(userRes.data.data);
+            navigate("/");
+        } catch (err) {
+            alert(err.response?.data?.message || "Google login failed");
+        }
+    };
+
+    useEffect(() => {
+        // Load Google Identity Services script
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        document.body.appendChild(script);
+
+        // Initialize Google Sign-In
+        script.onload = () => {
+            window.google.accounts.id.initialize({
+                client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+                callback: handleGoogleLogin,
+            });
+            window.google.accounts.id.renderButton(
+                document.getElementById("google-signin-button"),
+                {
+                    theme: "outline",
+                    size: "large",
+                    width: "100%",
+                }
+            );
+        };
+
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -61,12 +101,7 @@ const Login = () => {
                     </Button>
                 </form>
                 <div className="mt-4">
-                    <Button
-                        variant="destructive"
-                        className="w-full flex items-center justify-center gap-2 py-2 text-lg hover:brightness-110 transition"
-                    >
-                        Sign in with Google
-                    </Button>
+                    <div id="google-signin-button" className="w-full"></div>
                 </div>
             </div>
         </div>
