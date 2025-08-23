@@ -145,7 +145,7 @@ const ProfilePage = () => {
                 )}
                 <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
                     <div className="flex flex-col items-center lg:w-1/3">
-                        <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden shadow-md">
+                        <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden shadow-md border-2 border-gray-300 dark:border-gray-600">
                             {user.profilePic ? (
                                 <img
                                     src={user.profilePic}
@@ -159,12 +159,21 @@ const ProfilePage = () => {
                             )}
                         </div>
                         {isEditing && (
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleProfilePicChange}
-                                className="mt-4"
-                            />
+                            <div className="relative mt-4 w-full">
+                                <label
+                                    htmlFor="profile-pic-upload"
+                                    className="block w-full text-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500 cursor-pointer"
+                                >
+                                    {user.profilePicFile ? user.profilePicFile.name : 'Choose a Profile Picture'}
+                                </label>
+                                <input
+                                    id="profile-pic-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleProfilePicChange}
+                                    className="sr-only"
+                                />
+                            </div>
                         )}
                     </div>
                     <div className="flex-1 w-full space-y-4 lg:w-2/3">
@@ -177,10 +186,10 @@ const ProfilePage = () => {
                                     name="username"
                                     value={user.username}
                                     onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300 dark:bg-gray-700 dark:text-white"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 dark:bg-gray-700 dark:text-white mt-1"
                                 />
                             ) : (
-                                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-1">
                                     {user.username}
                                 </p>
                             )}
@@ -196,7 +205,7 @@ const ProfilePage = () => {
                                         type="password"
                                         value={passwords.oldPassword}
                                         onChange={handlePasswordChange}
-                                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300 dark:bg-gray-700 dark:text-white"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 dark:bg-gray-700 dark:text-white mt-1"
                                     />
                                 </div>
                                 <div>
@@ -208,7 +217,7 @@ const ProfilePage = () => {
                                         type="password"
                                         value={passwords.newPassword}
                                         onChange={handlePasswordChange}
-                                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300 dark:bg-gray-700 dark:text-white"
+                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring focus:ring-blue-300 dark:bg-gray-700 dark:text-white mt-1"
                                     />
                                 </div>
                             </>
