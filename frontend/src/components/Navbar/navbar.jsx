@@ -4,7 +4,7 @@ import logo from "../../assets/eventify.png";
 
 const Navbar = () => {
     return (
-        <nav className="bg-blue-600 p-4 shadow-md">
+        <nav className="bg-gray-900 dark:bg-gray-700 p-4 shadow-md">
             <div className="container mx-auto flex justify-between items-center">
                 <Link to="/" className="flex items-center space-x-2">
                     <img
