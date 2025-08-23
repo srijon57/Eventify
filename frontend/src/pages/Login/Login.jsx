@@ -16,7 +16,6 @@ const Login = () => {
             const res = await api.post("/auth/login", { email, password });
             localStorage.setItem("token", res.data.data.accessToken);
 
-            // Fetch the current user and update the context
             const userRes = await api.get("/auth/current-user");
             setUser(userRes.data.data);
 
