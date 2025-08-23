@@ -18,11 +18,7 @@ export default function StudentDashboard() {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const handleLogout = () => {
-    // Implement your logout logic here
-    console.log("Logging out...");
-    setShowLogoutDialog(false);
-  };
+
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
@@ -41,12 +37,6 @@ export default function StudentDashboard() {
         {/* Header and Logout Button */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Student Dashboard</h1>
-          <button
-            onClick={() => setShowLogoutDialog(true)}
-            className="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-50 bg-gray-200 dark:bg-gray-800 rounded-md shadow-sm hover:bg-gray-300 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Logout
-          </button>
         </div>
 
         {/* Registered Events Section */}
