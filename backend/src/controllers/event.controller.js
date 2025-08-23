@@ -80,6 +80,8 @@ const updateEvent = asyncHandler(async (req, res) => {
     );
 })
 
+
+//updated -e
 const getAllEvents = asyncHandler(async (req, res) => {
     const { category } = req.query;
     
@@ -91,13 +93,15 @@ const getAllEvents = asyncHandler(async (req, res) => {
     const events = await Event.find(filter)
         .sort({ eventTime: -1 })
         .populate("createdBy", "username profileImage email");
-
+    
+    
     return res.status(200).json(
-        new ApiResponse(200, events, "Events fetched successfully")
+        new ApiResponse(200, { events }, "Events fetched successfully")
     );
 });
 
 
+//updated -e
 const getEventId = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
@@ -108,8 +112,9 @@ const getEventId = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Event not found");
     }
 
+    // Corrected line: Ensure the event object is wrapped in a 'data' key.
     return res.status(200).json(
-        new ApiResponse(200, event, "Event fetched successfully")
+        new ApiResponse(200, { event }, "Event fetched successfully")
     );
 });
 

@@ -1,3 +1,5 @@
+// src/App.jsx
+
 import Navbar from "./components/Navbar/navbar";
 import Footer from "./components/Footer/footer";
 import mainRoutes from "./routes/mainRoutes";

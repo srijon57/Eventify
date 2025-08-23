@@ -21,7 +21,8 @@ router.route("/create-event")
     .post(verifyJWT, upload.fields([{ name: "image", maxCount: 1 }]), createEvent);
 
 router.route("/get-all-events")
-    .get(verifyJWT, getAllEvents);
+    .get(getAllEvents); 
+//made this above code public facing!!
 
 router.route("/registered-events")
     .get(verifyJWT, getRegisteredEventsForUser);
@@ -30,7 +31,8 @@ router.route("/:id")
     .patch(verifyJWT, upload.fields([{ name: "image", maxCount: 1 }]), updateEvent);
 
 router.route("/:id")
-    .get(verifyJWT, getEventId);
+    .get(getEventId);
+    //made this above code public facing!!
 
 router.route("/:id")
     .delete(verifyJWT, deleteEvent);
