@@ -28,7 +28,6 @@ const generateAccessAndRefreshToken = async (userId) => {
   }
 };
 
-
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
@@ -65,7 +64,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         throw new ApiError(401, error?.message || "Invalid Refresh Token");
     }
 });
-
 
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
