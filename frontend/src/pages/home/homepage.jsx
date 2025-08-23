@@ -1,36 +1,20 @@
-// src/pages/home/homepage.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import HeroImage from "@/assets/Hero.jpg";
-// Example events
+
 const events = [
-  {
-    title: "Tech Meetup 2024",
-    description: "Join us for a day of innovation and networking.",
-  },
-  {
-    title: "Web Dev Workshop",
-    description: "Learn the latest trends in web development.",
-  },
-  {
-    title: "AI & Machine Learning",
-    description: "An introduction to AI, with hands-on labs.",
-  },
-  {
-    title: "Startup Pitch Night",
-    description: "Pitch your ideas to top investors and mentors.",
-  },
-  {
-    title: "Blockchain Seminar",
-    description: "Explore blockchain technology and its applications.",
-  },
+  { title: "Tech Meetup 2024", description: "Join us for a day of innovation and networking." },
+  { title: "Web Dev Workshop", description: "Learn the latest trends in web development." },
+  { title: "AI & Machine Learning", description: "An introduction to AI, with hands-on labs." },
+  { title: "Startup Pitch Night", description: "Pitch your ideas to top investors and mentors." },
+  { title: "Blockchain Seminar", description: "Explore blockchain technology and its applications." },
 ];
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen p-6 bg-gray-50">
+    <div className="flex flex-col items-center justify-start min-h-screen p-6 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       
       {/* Hero Section */}
       <motion.section
@@ -40,7 +24,7 @@ export default function HomePage() {
         className="text-center max-w-4xl mb-12"
       >
         <h1 className="text-5xl font-extrabold mb-4">Welcome to Eventify</h1>
-        <p className="text-gray-600 text-lg">
+        <p className="text-gray-600 dark:text-gray-300 text-lg">
           Discover and join the latest tech events, workshops, and meetups near you.
         </p>
         <div className="mt-6">
@@ -49,7 +33,7 @@ export default function HomePage() {
           </motion.div>
         </div>
         <motion.img
-          src={HeroImage} // Replace with your hero image
+          src={HeroImage}
           alt="Event Hero"
           className="mt-8 w-full max-w-3xl rounded-xl shadow-lg"
           initial={{ scale: 0.95, opacity: 0 }}
@@ -71,12 +55,12 @@ export default function HomePage() {
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
             >
-              <Card className="w-full">
+              <Card className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle>{event.title}</CardTitle>
+                  <CardTitle className="text-gray-900 dark:text-gray-100">{event.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-500 mb-4">{event.description}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-300 mb-4">{event.description}</p>
                   <div className="flex justify-end">
                     <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
                       <Button>View Details</Button>
@@ -94,17 +78,17 @@ export default function HomePage() {
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mt-16 w-full max-w-4xl bg-white p-8 rounded-xl shadow-md text-center"
+        className="mt-16 w-full max-w-4xl bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md text-center border border-gray-200 dark:border-gray-700"
       >
         <h2 className="text-2xl font-semibold mb-4">Stay Updated</h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
           Subscribe to our newsletter to get the latest events directly in your inbox.
         </p>
         <form className="flex flex-col sm:flex-row gap-4 justify-center">
           <input
             type="email"
             placeholder="Enter your email"
-            className="px-4 py-2 border rounded-md flex-1"
+            className="px-4 py-2 border rounded-md flex-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
           />
           <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
             <Button>Subscribe</Button>
