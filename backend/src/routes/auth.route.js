@@ -8,7 +8,8 @@ import {
     getCurrentUser,
     changePassword,
     updateAccountDetails,
-    updateUserAvatar
+    updateUserAvatar,
+    verifyOTP
 } from "../controllers/auth.controller.js";
 
 import { upload } from "../middlewares/multer.middleware.js"
@@ -21,7 +22,7 @@ router.route("/register").post(
     upload.fields([{ name: "avatar", maxCount: 1 }]),
     registerUser
 )
-
+router.post("/verify-otp", verifyOTP);
 router.route("/login").post(loginUser);
 
 // Secured Route
