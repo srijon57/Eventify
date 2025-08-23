@@ -5,6 +5,7 @@ import Register from "../pages/Register/Register";
 import AboutUs from "../components/About/AboutUs";
 import PrivacyPolicy from "../pages/Privaacy/Privaacy.jsx";
 import StudentDashboard from "../pages/StudentDashboard/StudentDashboard.jsx";
+import AdminDashboard from "../pages/AdminDashboard/AdminDashboard.jsx";
 import Contact from "../components/Contact/Contact.jsx";
 import Profile from "../pages/Profile/Profile.jsx";
 import VerifyOTP from "../pages/Register/Verifyotp.jsx";
@@ -19,6 +20,7 @@ const mainRoutes = [
   <Route key="profile" path="/profile" element={<Profile />} />,
   <Route key="verify-otp" path="/verify-otp" element={<VerifyOTP />} />,
   <Route key="studentdashboard" path="/studentdashboard" element={<StudentDashboard />} />,
+  <Route key="admindashboard" path="/admindashboard" element={<AdminDashboard />} />,
 ];
 
 export default mainRoutes;
