@@ -83,7 +83,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
-
     if ([username, email, password].some((f) => !f?.trim())) {
         throw new ApiError(400, "All fields are required");
     }
@@ -93,37 +92,30 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(409, "User already exists");
     }
 
-    const profileImagePath = req.files?.avatar?.[0]?.path;
-    if (!profileImagePath) {
-        throw new ApiError(400, "Profile image is required");
+    let profileImageUrl = "";
+    if (req.files?.avatar?.[0]?.path) {
+        const profileImagePath = req.files?.avatar?.[0]?.path;
+        const profileImage = await uploadOnCloudinary(profileImagePath);
+        profileImageUrl = profileImage.url;
     }
 
-    const profileImage = await uploadOnCloudinary(profileImagePath);
-
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // generate OTP
     const otp = crypto.randomInt(100000, 999999).toString();
 
-    // save to PendingUser
     await PendingUser.create({
         username: username.toLowerCase().trim(),
         email,
-        password: hashedPassword,
-        profileImage: profileImage.url,
+        password,  // store plain password (hashed later)
+        profileImage: profileImageUrl,
         otp,
-        otpExpiry: Date.now() + 10 * 60 * 1000, // 10 minutes
+        otpExpiry: Date.now() + 10 * 60 * 1000,
     });
 
-    // send OTP via email (example using nodemailer)
     const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-        tls: {
-    rejectUnauthorized: false, 
-        },
+        tls: { rejectUnauthorized: false },
     });
+
     await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
@@ -133,6 +125,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, {}, "OTP sent to email"));
 });
+
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
@@ -229,40 +222,22 @@ const changePassword = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-    const { username, email } = req.body;
+    const { username } = req.body;
 
-    // 1️⃣ Validate input
-    if (!username?.trim() && !email?.trim()) {
-        throw new ApiError(
-            400,
-            "At least one field (username or email) is required"
-        );
+    if (!username?.trim()) {
+        throw new ApiError(400, "Username is required");
     }
 
-    // 2️⃣ Prepare update object
-    const updateData = {};
-    if (username?.trim()) updateData.username = username.trim().toLowerCase();
-    if (email?.trim()) updateData.email = email.trim().toLowerCase();
+    const updateData = { username: username.trim().toLowerCase() };
 
-    // 3️⃣ Check if email/username already exists (if provided)
-    if (updateData.email) {
-        const existingEmailUser = await User.findOne({
-            email: updateData.email,
-            _id: { $ne: req.user._id },
-        });
-        if (existingEmailUser)
-            throw new ApiError(409, "Email is already taken");
-    }
-    if (updateData.username) {
-        const existingUsernameUser = await User.findOne({
-            username: updateData.username,
-            _id: { $ne: req.user._id },
-        });
-        if (existingUsernameUser)
-            throw new ApiError(409, "Username is already taken");
+    const existingUsernameUser = await User.findOne({
+        username: updateData.username,
+        _id: { $ne: req.user._id },
+    });
+    if (existingUsernameUser) {
+        throw new ApiError(409, "Username is already taken");
     }
 
-    // 4️⃣ Update user
     const user = await User.findByIdAndUpdate(
         req.user._id,
         { $set: updateData },
@@ -273,10 +248,9 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         throw new ApiError(404, "User not found");
     }
 
-    // 5️⃣ Response
     return res
         .status(200)
-        .json(new ApiResponse(200, user, "Details updated successfully"));
+        .json(new ApiResponse(200, user, "Username updated successfully"));
 });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
@@ -296,7 +270,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         req.user?._id,
         {
             $set: {
-                avatar: avatar.url,
+                profileImage: avatar.url,
             },
         },
         { new: true }
@@ -316,31 +290,28 @@ const verifyOTP = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid or expired OTP");
     }
 
-    // Move data to User collection
     const user = await User.create({
         username: pendingUser.username,
         email: pendingUser.email,
         password: pendingUser.password,
-        profileImage: pendingUser.profileImage,
+        profileImage: pendingUser.profileImage || "", 
     });
 
     await PendingUser.deleteOne({ email });
 
-    // Generate tokens
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
         user._id
     );
 
-    return res
-        .status(201)
-        .json(
-            new ApiResponse(
-                201,
-                { user, accessToken, refreshToken },
-                "Account verified & registered"
-            )
-        );
+    return res.status(201).json(
+        new ApiResponse(
+            201,
+            { user, accessToken, refreshToken },
+            "Account verified & registered"
+        )
+    );
 });
+
 
 export {
     registerUser,

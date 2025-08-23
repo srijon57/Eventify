@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import logo from "../../assets/eventify.png";
 import api from "../../lib/api";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
+
 const Navbar = () => {
     const navigate = useNavigate();
     const { user, setUser } = useContext(AuthContext);
@@ -16,7 +17,6 @@ const Navbar = () => {
         } catch (err) {
             console.error("Logout failed:", err);
             alert("Logout failed. Try again.");
-            alert("Logout failed");
         }
     };
 
@@ -57,12 +57,20 @@ const Navbar = () => {
                     )}
 
                     {user && (
-                        <button
-                            onClick={handleLogout}
-                            className="text-white hover:text-gray-200"
-                        >
-                            Logout
-                        </button>
+                        <>
+                            <Link
+                                to="/profile"
+                                className="text-white hover:text-gray-200"
+                            >
+                                Profile
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="text-white hover:text-gray-200"
+                            >
+                                Logout
+                            </button>
+                        </>
                     )}
                 </div>
             </div>
