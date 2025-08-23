@@ -2,15 +2,16 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 
-const app = express() // creates a app instance which will hold routes, middlewares and configs
+
+const app = express() 
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN, // this allow only specific frontend to access your backend
-    credentials: true // enables cookies, auth headers etc to sent in requests 
+    origin: process.env.CORS_ORIGIN, 
+    credentials: true
 }))
 
-app.use(express.json({ // enables backend to accpet application/json requests
-    limit:"16kb" // prevents large JSON bodies
+app.use(express.json({
+    limit:"16kb" 
 }))
 
 app.use(express.urlencoded({
@@ -18,8 +19,14 @@ app.use(express.urlencoded({
     limit: "16kb"
 }))
 
-app.use(express.static("public")) // This allows you to serve things like images, HTML, CSS, etc., from a folder named public/.
+app.use(express.static("public")) 
 app.use(cookieParser());
 
+
+// ROUTERS
+
+import authRoutes from "./routes/auth.route.js";
+
+app.use("/api/v1/auth", authRoutes); 
 
 export { app }
