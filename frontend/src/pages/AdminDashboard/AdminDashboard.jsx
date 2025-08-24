@@ -77,11 +77,14 @@ export default function AdminDashboard() {
       <div className="flex-shrink-0 w-32 h-20 sm:w-48 sm:h-28 overflow-hidden rounded-md mr-4">
         {event.image ? (
           <img
-            src={`${BASE_URL}${event.image}`}
-            alt={event.title || 'Event Image'}
-            className="w-full h-full object-cover"
-            onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/400x225?text=NO+IMAGE'; }}
-          />
+  src={event.image}
+  alt={event.title || 'Event Image'}
+  className="w-full h-full object-cover"
+  onError={(e) => { 
+    e.target.onerror = null; 
+    e.target.src = 'https://placehold.co/400x225?text=NO+IMAGE'; 
+  }}
+/>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-xs text-gray-500 dark:text-gray-400">
             No Image
