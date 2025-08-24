@@ -1,7 +1,5 @@
-// src/pages/admin/EventForm.jsx
-
 import React, { useState } from 'react';
-
+import api from '../../lib/api'; 
 export default function EventForm({ onCancel }) {
   const [formData, setFormData] = useState({
     title: '',
@@ -41,23 +39,26 @@ export default function EventForm({ onCancel }) {
     if (formData.image) {
       data.append('image', formData.image);
     }
-    
-    try {
-      const response = await fetch('http://localhost:8000/api/v1/events/create-event', {
-        method: 'POST',
-        // Add this line to send the cookies with the request
-        credentials: 'include',
-        body: data,
-      });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to post event.');
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found. Please log in.");
       }
 
-      const result = await response.json();
-      console.log('Event successfully posted:', result);
-      
+      const response = await api.post('/events/create-event', data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // Note: FormData automatically sets the correct Content-Type (multipart/form-data) with boundary
+        },
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to post event.');
+      }
+
+      console.log('Event successfully posted:', response.data);
+
       setFormData({
         title: '',
         description: '',
@@ -71,7 +72,7 @@ export default function EventForm({ onCancel }) {
 
     } catch (err) {
       console.error('Error posting event:', err);
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || 'Failed to post event.');
     } finally {
       setIsLoading(false);
     }
