@@ -1,6 +1,6 @@
-// src/pages/EventPage/EventPage.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import api from "../../lib/api"; // Import the configured Axios instance
 
 export default function EventPage() {
   const { id } = useParams();
@@ -16,20 +16,27 @@ export default function EventPage() {
   const [studentId, setStudentId] = useState("");
   const [department, setDepartment] = useState("");
 
-  const API_URL = "http://localhost:8000";
-
   // Fetch current logged-in user
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/v1/auth/current-user`, {
-          method: "GET",
-          credentials: "include",
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setUser(null);
+          return;
+        }
+
+        const response = await api.get("/auth/current-user", {
+          headers: {
+            Authorization: Bearer ${token},
+          },
         });
 
-        const data = await res.json();
-        if (res.ok && data.success) setUser(data.data);
-        else setUser(null);
+        if (response.data.success) {
+          setUser(response.data.data);
+        } else {
+          setUser(null);
+        }
       } catch (err) {
         console.error("Error fetching user:", err);
         setUser(null);
@@ -42,15 +49,19 @@ export default function EventPage() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/v1/events/${id}`, {
-          method: "GET",
+        const token = localStorage.getItem("token");
+        const response = await api.get(/events/${id}, {
+          headers: token ? { Authorization: Bearer ${token} } : {},
         });
-        if (res.ok) {
-          const data = await res.json();
-          setEvent(data.data.event);
+
+        if (response.data.success) {
+          setEvent(response.data.data);
+        } else {
+          setEvent(null);
         }
       } catch (err) {
         console.error("Error fetching event:", err);
+        setEvent(null);
       } finally {
         setLoading(false);
       }
@@ -69,25 +80,30 @@ export default function EventPage() {
       setRegistering(true);
       setMessage(null);
 
-      const res = await fetch(`${API_URL}/api/v1/events/${id}/register`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId, department }),
-      });
+      const token = localStorage.getItem("token");
+      const response = await api.post(
+        /events/${id}/register,
+        { studentId, department },
+        {
+          headers: {
+            Authorization: Bearer ${token},
+          },
+        }
+      );
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Registration failed");
-
-      setMessage("✅ Successfully registered!");
-      setEvent((prev) => ({
-        ...prev,
-        participantsCount: prev.participantsCount + 1,
-      }));
-      setShowRegisterForm(false);
+      if (response.data.success) {
+        setMessage("✅ Successfully registered!");
+        setEvent((prev) => ({
+          ...prev,
+          participantsCount: prev.participantsCount + 1,
+        }));
+        setShowRegisterForm(false);
+      } else {
+        throw new Error(response.data.message || "Registration failed");
+      }
     } catch (err) {
       console.error("Error registering:", err);
-      setMessage("❌ " + err.message);
+      setMessage("❌ " + (err.response?.data?.message || err.message));
     } finally {
       setRegistering(false);
     }
@@ -126,13 +142,13 @@ export default function EventPage() {
 
         <div className="flex items-center gap-3 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm">
           <img
-            src={event.createdBy.profileImage}
-            alt={event.createdBy.username}
+            src={event.createdBy?.profileImage}
+            alt={event.createdBy?.username}
             className="w-12 h-12 rounded-full object-cover"
           />
           <div>
-            <p className="font-semibold">{event.createdBy.username}</p>
-            <p className="text-sm text-gray-500">{event.createdBy.email}</p>
+            <p className="font-semibold">{event.createdBy?.username}</p>
+            <p className="text-sm text-gray-500">{event.createdBy?.email}</p>
           </div>
         </div>
 
