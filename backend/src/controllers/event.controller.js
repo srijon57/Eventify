@@ -391,7 +391,17 @@ const getRegisteredEventsForUser = asyncHandler(async (req, res) => {
   );
 });
 
-
+const getPassedEvent = asyncHandler(async (req, res) => { 
+    const now = new Date();
+    
+    const passedEvent = await Event
+        .find({ eventTime: { $lt: now } })
+        .sort({ eventTime: -1 });
+    
+    return res.status(200).json(
+        new ApiResponse(200, passedEvent, "Passed events fetched successfully")
+    );
+})
 
 export {
     createEvent,
@@ -403,5 +413,6 @@ export {
     unregisterFromEvent,
     getAllRegisteredUsersForEvent,
     getRegisteredEventsForUser,
-    sendEventEmail
+    sendEventEmail,
+    getPassedEvent
 };
