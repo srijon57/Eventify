@@ -205,13 +205,29 @@ const deleteEvent = asyncHandler(async (req, res) => {
 
 const registerToEvent = asyncHandler(async (req, res) => { 
     const { event } = req.params;
-    let { studentId, department } = req.body;
+    let { studentId, department } = req.body || {};
 
-    studentId = studentId?.trim();
-    department = department?.trim();
+    const user = await User.findById(req.user._id);
 
-    if (!studentId || !department) {
-        throw new ApiError(400, "Student ID and Department are required");
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    if (!user.studentId || !user.department) {
+        studentId = studentId?.trim();
+        department = department?.trim();
+
+        if (!studentId || !department) {
+            throw new ApiError(400, "Student ID and Department are required for first registration");
+        }
+
+        user.studentId = studentId;
+        user.department = department;
+        await user.save();
+    } else {
+
+        studentId = user.studentId;
+        department = user.department;
     }
 
     const eventDetails = await Event.findById(event);
@@ -220,7 +236,7 @@ const registerToEvent = asyncHandler(async (req, res) => {
     }
 
     const existingRegistration = await Registration.findOne({
-        user: req.user._id,
+        user: user._id,
         event: eventDetails._id
     });
 
@@ -228,13 +244,8 @@ const registerToEvent = asyncHandler(async (req, res) => {
         throw new ApiError(400, "You have already registered for this event");
     }
 
-    await User.findByIdAndUpdate(req.user._id, {
-        studentId,
-        department
-    }, { new: true });
-
     const registration = await Registration.create({
-        user: req.user._id,
+        user: user._id,
         event: eventDetails._id,
         studentId,
         department

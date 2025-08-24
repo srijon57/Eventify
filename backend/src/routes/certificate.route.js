@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
     createCertificate,
-    
 } from "../controllers/certificate.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
