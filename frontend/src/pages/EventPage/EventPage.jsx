@@ -12,6 +12,10 @@ export default function EventPage() {
   const [registering, setRegistering] = useState(false);
   const [message, setMessage] = useState(null);
 
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [studentId, setStudentId] = useState("");
+  const [department, setDepartment] = useState("");
+
   const API_URL = "http://localhost:8000";
 
   // Fetch current logged-in user
@@ -23,12 +27,9 @@ export default function EventPage() {
           credentials: "include",
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
+        const data = await res.json();
+        if (res.ok && data.success) setUser(data.data);
+        else setUser(null);
       } catch (err) {
         console.error("Error fetching user:", err);
         setUser(null);
@@ -44,7 +45,6 @@ export default function EventPage() {
         const res = await fetch(`${API_URL}/api/v1/events/${id}`, {
           method: "GET",
         });
-
         if (res.ok) {
           const data = await res.json();
           setEvent(data.data.event);
@@ -60,8 +60,8 @@ export default function EventPage() {
 
   // Handle registration
   const handleRegister = async () => {
-    if (!user) {
-      navigate("/login");
+    if (!studentId.trim() || !department.trim()) {
+      setMessage("❌ Student ID and Department are required");
       return;
     }
 
@@ -73,14 +73,18 @@ export default function EventPage() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user._id }),
+        body: JSON.stringify({ studentId, department }),
       });
 
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Registration failed");
 
       setMessage("✅ Successfully registered!");
-      setEvent((prev) => ({ ...prev, participantsCount: prev.participantsCount + 1 }));
+      setEvent((prev) => ({
+        ...prev,
+        participantsCount: prev.participantsCount + 1,
+      }));
+      setShowRegisterForm(false);
     } catch (err) {
       console.error("Error registering:", err);
       setMessage("❌ " + err.message);
@@ -132,15 +136,55 @@ export default function EventPage() {
           </div>
         </div>
 
-        {/* Show register button for any logged-in user */}
+        {/* Register button */}
         {user ? (
-          <button
-            onClick={handleRegister}
-            disabled={registering}
-            className="block w-full text-center px-4 py-3 bg-green-600 rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors text-white font-medium"
-          >
-            {registering ? "Registering..." : "Register for Event"}
-          </button>
+          <>
+            <button
+              onClick={() => setShowRegisterForm(true)}
+              disabled={registering}
+              className="block w-full text-center px-4 py-3 bg-green-600 rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors text-white font-medium"
+            >
+              {registering ? "Registering..." : "Register for Event"}
+            </button>
+
+            {/* Registration form modal */}
+            {showRegisterForm && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-80 space-y-4">
+                  <h2 className="text-xl font-semibold text-center">Register for Event</h2>
+                  <input
+                    type="text"
+                    placeholder="Student ID"
+                    value={studentId}
+                    onChange={(e) => setStudentId(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Department"
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50"
+                  />
+                  <div className="flex justify-between gap-2">
+                    <button
+                      onClick={() => setShowRegisterForm(false)}
+                      className="flex-1 px-4 py-2 bg-gray-500 rounded-lg text-white hover:bg-gray-600"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleRegister}
+                      disabled={registering}
+                      className="flex-1 px-4 py-2 bg-green-600 rounded-lg text-white hover:bg-green-700"
+                    >
+                      {registering ? "Registering..." : "Submit"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <button
             onClick={() => navigate("/login")}

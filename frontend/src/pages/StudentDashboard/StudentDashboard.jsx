@@ -1,35 +1,87 @@
 // src/pages/dashboard/StudentDashboard.jsx
 
-import React, { useState } from 'react';
-
-// This is just mock data to simulate registered events with categories
-const registeredEvents = [
-  { id: 1, name: 'Tech Meetup 2024', description: 'Join us for a day of innovation and networking.', category: 'Tech', imageUrl: 'https://placehold.co/100x100/A3E635/000000?text=Event+1' },
-  { id: 2, name: 'Web Dev Workshop', description: 'Learn the latest trends in web development.', category: 'Tech', imageUrl: 'https://placehold.co/100x100/FDE68A/000000?text=Event+2' },
-  { id: 3, name: 'AI & Machine Learning', description: 'An introduction to AI, with hands-on labs.', category: 'Tech', imageUrl: 'https://placehold.co/100x100/BEF264/000000?text=Event+3' },
-  { id: 4, name: 'Cybersecurity Conference', description: 'Explore the future of digital security.', category: 'Tech', imageUrl: 'https://placehold.co/100x100/93C5FD/000000?text=Event+4' },
-  { id: 5, name: 'Game Development Hackathon', description: 'Build your own game in 24 hours.', category: 'Tech', imageUrl: 'https://placehold.co/100x100/C4B5FD/000000?text=Event+5' },
-  { id: 6, name: 'UI/UX Design Masterclass', description: 'Master the principles of user-centric design.', category: 'Design', imageUrl: 'https://placehold.co/100x100/A7F3D0/000000?text=Event+6' },
-  { id: 7, name: 'Creative Writing Workshop', description: 'Unleash your inner writer.', category: 'Art & Culture', imageUrl: 'https://placehold.co/100x100/A1A1AA/000000?text=Event+7' },
-  { id: 8, name: 'Photography Basics', description: 'Learn to take stunning photos.', category: 'Art & Culture', imageUrl: 'https://placehold.co/100x100/22C55E/000000?text=Event+8' },
-];
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../../context/AuthContext/AuthContext';
+import api from '../../lib/api'; // Assuming your API utility is here
 
 export default function StudentDashboard() {
+  const { user, isLoading: isAuthLoading } = useContext(AuthContext);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  
+  // New state variables for fetching events
+  const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-
+useEffect(() => {
+    if (!isAuthLoading && user) {
+      const fetchRegisteredEvents = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const accessToken = localStorage.getItem("accessToken");
+          // The updated API call with the correct path
+          const response = await api.get(`/events/registered-events`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          const eventsData = response.data.data;
+          setRegisteredEvents(eventsData);
+        } catch (err) {
+          console.error("Failed to fetch registered events:", err);
+          setError("Failed to load registered events. Please try again.");
+          setRegisteredEvents([]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchRegisteredEvents();
+    }
+  }, [user, isAuthLoading]);
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
   };
-
-  const filteredEvents = registeredEvents.filter(event => {
+  
+  // Updated filtering logic to match the new API response structure
+  const filteredEvents = registeredEvents.filter(reg => {
+    // The event data is now nested inside the registration object
+    const event = reg.event;
+    if (!event) return false; // Skip if for some reason event data is missing
+    
     if (selectedCategory === 'All') {
       return true;
     }
     return event.category === selectedCategory;
   });
+
+  // This is a placeholder for the handleLogout function, which you will need to implement
+  const handleLogout = () => {
+    // Implement your logout logic here (e.g., clear tokens, redirect)
+    console.log("Logout functionality to be implemented.");
+    setShowLogoutDialog(false);
+  };
+
+  // Show a loading state while fetching user or event data
+  if (isAuthLoading || isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-50">
+        <p className="text-xl">Loading your dashboard...</p>
+      </div>
+    );
+  }
+
+  // Show an error message if the fetch failed
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-950 text-red-500">
+        <p className="text-xl">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center min-h-screen p-4 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-50">
@@ -37,6 +89,7 @@ export default function StudentDashboard() {
         {/* Header and Logout Button */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Student Dashboard</h1>
+          {/* You can add a logout button here */}
         </div>
 
         {/* Registered Events Section */}
@@ -53,26 +106,27 @@ export default function StudentDashboard() {
               className="py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="All">All Categories</option>
-              <option value="Tech">Tech</option>
-              <option value="Design">Design</option>
-              <option value="Art & Culture">Art & Culture</option>
+              {/* Dynamically create options based on fetched events */}
+              {Array.from(new Set(filteredEvents.map(reg => reg.event.category))).map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
             </select>
           </div>
         </div>
         
         <div className="h-[400px] w-full overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700 p-4 space-y-4">
           {filteredEvents.length > 0 ? (
-            filteredEvents.map(event => (
-              <div key={event.id} className="w-full bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm p-4 flex items-center space-x-4">
+            filteredEvents.map(reg => (
+              <div key={reg.registrationId} className="w-full bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm p-4 flex items-center space-x-4">
                 {/* Event Image */}
                 <img 
-                  src={event.imageUrl} 
-                  alt={event.name} 
+                  src={reg.event.image} 
+                  alt={reg.event.title} 
                   className="w-16 h-16 object-cover rounded-md flex-shrink-0"
                 />
                 <div>
-                  <h3 className="text-lg font-medium">{event.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{event.description}</p>
+                  <h3 className="text-lg font-medium">{reg.event.title}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{reg.event.description}</p>
                 </div>
               </div>
             ))
