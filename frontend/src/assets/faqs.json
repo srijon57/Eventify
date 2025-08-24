@@ -1,0 +1,87 @@
+[
+  {
+    "question": "How do I register for an event?",
+    "keywords": ["how", "register"],
+    "answer": "Go to 'All Events,' pick an event, and click 'Register.'"
+  },
+  {
+    "question": "Can I cancel my event registration?",
+    "keywords": ["cancel", "registration"],
+    "answer": "Yes, open 'My Events' and click 'Unregister' next to the event."
+  },
+  {
+    "question": "How do I unregister from an event?",
+    "keywords": ["how", "unregister"],
+    "answer": "Open 'My Events' and click 'Unregister' next to the event."
+  },
+  {
+    "question": "How do I view my profile?",
+    "keywords": ["view", "profile"],
+    "answer": "Click 'Profile' in the sidebar or topbar to view your details."
+  },
+  {
+    "question": "How can I view all events?",
+    "keywords": ["view", "all", "events"],
+    "answer": "Click on 'All Events' from the main menu to see a list of all upcoming events."
+  },
+  {
+    "question": "How do I search for an event?",
+    "keywords": ["search", "event"],
+    "answer": "Use the search bar at the top of the 'All Events' page to find events by name, club, or date."
+  },
+  {
+    "question": "How can I filter events?",
+    "keywords": ["filter", "events"],
+    "answer": "On the 'All Events' page, use the filter options to sort events by date, category, or club."
+  },
+  {
+    "question": "How do I view my registered events?",
+    "keywords": ["view", "register", "registered", "events"],
+    "answer": "Click on 'My Events' to see all the events you have registered for."
+  },
+  {
+    "question": "How do I change my password?",
+    "keywords": ["change", "password"],
+    "answer": "On your profile page, find the 'Edit' option and follow the steps to change your password."
+  },
+  {
+    "question": "How do I upload a profile picture?",
+    "keywords": ["upload", "profile", "picture"],
+    "answer": "On your profile page, click on your profile picture to upload a new one."
+  },
+  {
+    "question": "How can I edit my username?",
+    "keywords": ["edit", "username"],
+    "answer": "On your profile page, find the option to edit your username."
+  },
+  {
+    "question": "How do I contact a club admin?",
+    "keywords": ["contact", "club", "admin"],
+    "answer": "On the club's main page, find contact information and a messaging option for the admin in the '/contact' section."
+  },
+  {
+    "question": "How do I get event notifications?",
+    "keywords": ["get", "event", "notifications"],
+    "answer": "Check your personal email for event updates and notifications."
+  },
+  {
+    "question": "How can I check event details?",
+    "keywords": ["check", "event", "details"],
+    "answer": "Click on any event from the 'All Events' page to view its full description, location, and time."
+  },
+  {
+    "question": "Can I register for multiple events?",
+    "keywords": ["register", "multiple", "events"],
+    "answer": "Yes, you can register for as many events as you like by visiting each event's page and clicking 'Register.'"
+  },
+  {
+    "question": "How do I verify my account?",
+    "keywords": ["verify", "account"],
+    "answer": "After registration, check your email for a verification link or OTP to activate your account."
+  },
+  {
+    "question": "How can I learn about the admin?",
+    "keywords": ["about", "admin"],
+    "answer": "Visit the 'About Us' page for information about the admin."
+  }
+]

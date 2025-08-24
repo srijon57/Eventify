@@ -7,6 +7,7 @@ const ProfilePage = () => {
     const { user: authUser, setUser } = useContext(AuthContext);
     const [user, setUserState] = useState({
         username: "",
+        email: "",
         profilePic: null,
         profilePicFile: null,
     });
@@ -24,13 +25,17 @@ const ProfilePage = () => {
             try {
                 const response = await api.get("/auth/current-user", {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "accessToken"
+                        )}`,
                     },
                 });
                 const userData = response.data.data;
                 setUserState({
                     username: userData.username || "",
-                    profilePic: userData.avatar || userData.profileImage || null,
+                    email: userData.email || "", // Set email from response
+                    profilePic:
+                        userData.avatar || userData.profileImage || null,
                     profilePicFile: null,
                 });
             } catch (error) {
@@ -74,7 +79,9 @@ const ProfilePage = () => {
                     { username: user.username },
                     {
                         headers: {
-                            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                            Authorization: `Bearer ${localStorage.getItem(
+                                "accessToken"
+                            )}`,
                             "Content-Type": "application/json",
                         },
                     }
@@ -85,7 +92,9 @@ const ProfilePage = () => {
                 formData.append("avatar", user.profilePicFile);
                 await api.patch("/auth/update-avatar", formData, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "accessToken"
+                        )}`,
                     },
                 });
             }
@@ -98,7 +107,9 @@ const ProfilePage = () => {
                     },
                     {
                         headers: {
-                            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                            Authorization: `Bearer ${localStorage.getItem(
+                                "accessToken"
+                            )}`,
                             "Content-Type": "application/json",
                         },
                     }
@@ -107,13 +118,20 @@ const ProfilePage = () => {
             }
             const response = await api.get("/auth/current-user", {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                    Authorization: `Bearer ${localStorage.getItem(
+                        "accessToken"
+                    )}`,
                 },
             });
             setUser(response.data.data);
             setUserState((prev) => ({
                 ...prev,
-                profilePic: response.data.data.avatar || response.data.data.profileImage || null,
+                username: response.data.data.username || "",
+                email: response.data.data.email || "", // Update email after save
+                profilePic:
+                    response.data.data.avatar ||
+                    response.data.data.profileImage ||
+                    null,
                 profilePicFile: null,
             }));
             setSuccess("Profile updated successfully!");
@@ -121,7 +139,10 @@ const ProfilePage = () => {
             setPasswords({ oldPassword: "", newPassword: "" });
         } catch (error) {
             console.error("Error updating profile:", error);
-            setError(error.response?.data?.message || "Update failed. Please try again.");
+            setError(
+                error.response?.data?.message ||
+                    "Update failed. Please try again."
+            );
         }
     };
 
@@ -164,7 +185,9 @@ const ProfilePage = () => {
                                     htmlFor="profile-pic-upload"
                                     className="block w-full text-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500 cursor-pointer"
                                 >
-                                    {user.profilePicFile ? user.profilePicFile.name : 'Choose a Profile Picture'}
+                                    {user.profilePicFile
+                                        ? user.profilePicFile.name
+                                        : "Choose a Profile Picture"}
                                 </label>
                                 <input
                                     id="profile-pic-upload"
@@ -193,6 +216,14 @@ const ProfilePage = () => {
                                     {user.username}
                                 </p>
                             )}
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-300">
+                                Email
+                            </h3>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-1">
+                                {user.email}
+                            </p>
                         </div>
                         {isEditing && (
                             <>
@@ -227,7 +258,10 @@ const ProfilePage = () => {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
                     {isEditing ? (
                         <>
-                            <Button className="flex-1 py-2" onClick={handleSave}>
+                            <Button
+                                className="flex-1 py-2"
+                                onClick={handleSave}
+                            >
                                 Save
                             </Button>
                             <Button
@@ -250,7 +284,7 @@ const ProfilePage = () => {
                         </>
                     ) : (
                         <Button
-                            className="flex-1 py-2"
+                            className="w-1/3 py-2"
                             onClick={() => setIsEditing(true)}
                         >
                             Edit Profile
