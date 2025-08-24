@@ -6,10 +6,18 @@ import HeroImage from "@/assets/Hero.jpg";
 import { useNavigate } from "react-router-dom";
 import api from "../../lib/api"; // Import the configured Axios instance
 
+// Assuming you have the BASE_URL defined somewhere, 
+// for image loading compatibility, you might need to import it here
+// import { BASE_URL } from "../../lib/api"; 
+// OR define it locally: 
+// const BASE_URL = import.meta.env.VITE_BACKEND_URL; 
+
 export default function HomePage() {
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Add state for top event since it's used in the effect hook
+  const [topEvent, setTopEvent] = useState(null); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,10 +60,31 @@ export default function HomePage() {
     fetchTopEvent();
   }, []);
 
-
   const handleNavigateToEvent = (eventId) => {
     navigate(`/eventpage/${eventId}`);
   };
+  
+  // Helper Component for repeated Card content
+  const EventCardContent = ({ event, colorClass, darkColorClass }) => (
+    <>
+      {event.image && (
+          <img
+            // src={BASE_URL ? `${BASE_URL}${event.image}` : event.image} // Use BASE_URL if defined
+            src={event.image} // Keeping original for now, but be aware of Base URL issue
+            alt={event.title}
+            className="w-full h-48 object-cover rounded-md mb-4"
+          />
+        )}
+      <p className={`text-sm ${colorClass} ${darkColorClass} mb-4`}>
+        {event.description}
+      </p>
+      <div className="flex justify-end">
+        <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
+          <Button onClick={() => handleNavigateToEvent(event._id)}>View Details</Button>
+        </motion.div>
+      </div>
+    </>
+  );
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen p-6 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -84,93 +113,81 @@ export default function HomePage() {
           transition={{ duration: 1 }}
         />
       </motion.section>
-      {/* Top Registered Events */}
-      <section className="w-full max-w-6xl mt-12">
-        <h2 className="text-3xl font-semibold mb-6 text-blue-600 dark:text-blue-400">
-          Top Registered Events
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.slice(1, 2).map((event) => ( // adjust slice as needed
-            <motion.div
-              key={event._id + "-registered"}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
-            >
-              <Card className="w-full bg-blue-50 dark:bg-blue-900 border-blue-300 dark:border-blue-700">
-                <CardHeader>
-                  <CardTitle className="text-blue-900 dark:text-blue-100">
-                    {event.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {event.image && (
-                      <img
-                        src={event.image}
-                        alt={event.title}
-                        className="w-full h-48 object-cover rounded-md mb-4"
-                      />
-                    )}
-                  <p className="text-sm text-blue-800 dark:text-blue-200 mb-4">
-                    {event.description}
-                  </p>
-                  <div className="flex justify-end">
-                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
-                      <Button onClick={() => handleNavigateToEvent(event._id)}>View Details</Button>
-                    </motion.div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
-      {/* Top Viewed Events */}
-      <section className="w-full max-w-6xl mt-12 mb-20">
-        <h2 className="text-3xl font-semibold mb-6 text-green-600 dark:text-green-400">
-          Top Viewed Events
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.slice(1, 2).map((event) => ( 
-            <motion.div
-              key={event._id + "-viewed"}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
-            >
-              <Card className="w-full bg-green-50 dark:bg-green-900 border-green-300 dark:border-green-700">
-                <CardHeader>
-                  <CardTitle className="text-green-900 dark:text-green-100">
-                    {event.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {event.image && (
-                      <img
-                        src={event.image}
-                        alt={event.title}
-                        className="w-full h-48 object-cover rounded-md mb-4"
-                      />
-                    )}
-                  <p className="text-sm text-green-800 dark:text-green-200 mb-4">
-                    {event.description}
-                  </p>
-                  <div className="flex justify-end">
-                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
-                      <Button onClick={() => handleNavigateToEvent(event._id)}>View Details</Button>
-                    </motion.div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      {/* NEW: Container for Top Registered and Top Viewed Sections */}
+      <div className="w-full max-w-6xl flex flex-col lg:flex-row lg:space-x-8 mt-12 mb-20">
+        
+        {/* Top Registered Events */}
+        <section className="w-full lg:w-1/2 mb-12 lg:mb-0">
+          <h2 className="text-3xl font-semibold mb-6 text-blue-600 dark:text-blue-400">
+            Top Registered Events
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+            {events.slice(0, 1).map((event) => ( // Display the very first event (index 0)
+              <motion.div
+                key={event._id + "-registered"}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4 }}
+              >
+                <Card className="w-full bg-blue-50 dark:bg-blue-900 border-blue-300 dark:border-blue-700">
+                  <CardHeader>
+                    <CardTitle className="text-blue-900 dark:text-blue-100">
+                      {event.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <EventCardContent 
+                      event={event} 
+                      colorClass="text-blue-800" 
+                      darkColorClass="dark:text-blue-200" 
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Top Viewed Events */}
+        <section className="w-full lg:w-1/2">
+          <h2 className="text-3xl font-semibold mb-6 text-green-600 dark:text-green-400">
+            Top Viewed Events
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+            {events.slice(1, 2).map((event) => ( // Display the second event (index 1)
+              <motion.div
+                key={event._id + "-viewed"}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4 }}
+              >
+                <Card className="w-full bg-green-50 dark:bg-green-900 border-green-300 dark:border-green-700">
+                  <CardHeader>
+                    <CardTitle className="text-green-900 dark:text-green-100">
+                      {event.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <EventCardContent 
+                      event={event} 
+                      colorClass="text-green-800" 
+                      darkColorClass="dark:text-green-200" 
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+      </div>
+      {/* END NEW CONTAINER */}
+      
       {/* Featured Events */}
       <section className="w-full max-w-6xl">
         <h2 className="text-3xl font-semibold mb-6">Featured Events</h2>
@@ -194,19 +211,11 @@ export default function HomePage() {
                     <CardTitle className="text-gray-900 dark:text-gray-100">{event.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {event.image && (
-                      <img
-                        src={event.image}
-                        alt={event.title}
-                        className="w-full h-48 object-cover rounded-md mb-4"
-                      />
-                    )}
-                    <p className="text-sm text-gray-500 dark:text-gray-300 mb-4">{event.description}</p>
-                    <div className="flex justify-end">
-                      <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
-                        <Button onClick={() => handleNavigateToEvent(event._id)}>View Details</Button>
-                      </motion.div>
-                    </div>
+                    <EventCardContent 
+                      event={event} 
+                      colorClass="text-gray-500" 
+                      darkColorClass="dark:text-gray-300" 
+                    />
                   </CardContent>
                 </Card>
               </motion.div>
@@ -217,7 +226,6 @@ export default function HomePage() {
         )}
       </section>
         
-      
       {/* Newsletter / Call-to-Action */}
       <motion.section
         initial={{ opacity: 0, y: 50 }}
