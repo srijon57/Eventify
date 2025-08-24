@@ -9,11 +9,11 @@ import { sendEmail } from "../utils/sendEmail.js";
 
 
 const createEvent = asyncHandler(async (req, res) => { 
-    const { title, description, location, eventTime, category, organizingClub } = req.body;
+    const { title, description, location, eventTime, category, organizingClub, registrationDeadline } = req.body;
 
     if (![title, description, location, eventTime, category, organizingClub].every(field => field?.trim()))
     {
-        throw new ApiError(400, "All fields except image are required");
+        throw new ApiError(400, "All fields except image and registrationDeadline are required");
     }
 
     let imageUrl = "";
@@ -31,6 +31,9 @@ const createEvent = asyncHandler(async (req, res) => {
 
     imageUrl = uploadImage.url;
 
+    const parsedEventTime = new Date(eventTime);
+    let deadline = registrationDeadline ? new Date(registrationDeadline) : new Date(parsedEventTime.getTime() - 60 * 60 * 1000);
+
     const event = await Event.create({
         title: title.trim(),
         description: description,
@@ -39,7 +42,8 @@ const createEvent = asyncHandler(async (req, res) => {
         eventTime: new Date(eventTime),
         category,
         organizingClub: organizingClub,
-        createdBy: req.user?._id
+        createdBy: req.user?._id,
+        registrationDeadline: deadline
     });
 
     res.status(201).json(
@@ -169,15 +173,21 @@ const getAllEvents = asyncHandler(async (req, res) => {
   );
 });
 
-
 const getEventId = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const userId = req.user._id;
 
     const event = await Event.findById(id)
         .populate("createdBy", "username profileImage email");
 
-    if (!event) {
-        throw new ApiError(404, "Event not found");
+    if (!event) throw new ApiError(404, "Event not found");
+
+    const hasViewed = event.viewedBy.map(u => u.toString()).includes(userId.toString());
+
+    if (!hasViewed) {
+        event.viewsCount += 1;
+        event.viewedBy.push(userId);
+        await event.save();
     }
 
     return res.status(200).json(
@@ -233,6 +243,15 @@ const registerToEvent = asyncHandler(async (req, res) => {
     const eventDetails = await Event.findById(event);
     if (!eventDetails) {
         throw new ApiError(404, "Event not found");
+    }
+
+    const effectiveDeadline = eventDetails.registrationDeadline || 
+                                            new Date(eventDetails.eventTime.getTime() - 60 * 60 * 1000);
+
+    if (new Date() > effectiveDeadline) {
+        return res.status(400).json(
+            new ApiResponse(400, null, "Registration is closed for this event")
+        );
     }
 
     const existingRegistration = await Registration.findOne({
