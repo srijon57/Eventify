@@ -24,8 +24,6 @@ const certificateSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
 certificateSchema.index({ user: 1, event: 1 }, { unique: true });
 
-const Certificate = mongoose.model("Certificate", certificateSchema);
-export default Certificate;
+export const Certificate = mongoose.model("Certificate", certificateSchema);
