@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import api from '../../lib/api'; 
+
 export default function EventForm({ onCancel }) {
   const [formData, setFormData] = useState({
     title: '',
@@ -31,7 +32,13 @@ export default function EventForm({ onCancel }) {
     const data = new FormData();
     data.append('title', formData.title);
     data.append('description', formData.description);
-    data.append('location', formData.location);
+
+    // Convert location string into a Google Maps search link
+    const googleLocation = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      formData.location
+    )}`;
+    data.append('location', googleLocation);
+
     data.append('eventTime', new Date(formData.eventTime).toISOString());
     data.append('category', formData.category);
     data.append('organizingClub', formData.organizingClub);
@@ -49,7 +56,7 @@ export default function EventForm({ onCancel }) {
       const response = await api.post('/events/create-event', data, {
         headers: {
           Authorization: `Bearer ${token}`,
-          // Note: FormData automatically sets the correct Content-Type (multipart/form-data) with boundary
+          // FormData sets correct Content-Type automatically
         },
       });
 
@@ -59,6 +66,7 @@ export default function EventForm({ onCancel }) {
 
       console.log('Event successfully posted:', response.data);
 
+      // Reset form after success
       setFormData({
         title: '',
         description: '',
@@ -136,6 +144,19 @@ export default function EventForm({ onCancel }) {
             className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-100 dark:bg-gray-800 p-2"
             required
           />
+          {formData.location && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Will be stored as:{" "}
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formData.location)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Google Maps Link
+              </a>
+            </p>
+          )}
         </div>
         <div>
           <label htmlFor="eventTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
