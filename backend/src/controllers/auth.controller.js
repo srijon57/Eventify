@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-import { PendingUser } from "../models/pendingUser.model";
+import { PendingUser } from "../models/pendingUser.model.js";
 import { OAuth2Client } from "google-auth-library";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
