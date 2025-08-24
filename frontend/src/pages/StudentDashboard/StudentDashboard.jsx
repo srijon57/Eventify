@@ -47,23 +47,28 @@ export default function StudentDashboard() {
         setSelectedCategory(e.target.value);
     }, []);
 
-    const handleNavigateToEvent = useCallback((eventId) => {
-        if (eventId) {
-            navigate(`/eventpage/${eventId}`);
-        }
-    }, [navigate]);
+    const handleNavigateToEvent = useCallback(
+        (eventId) => {
+            if (eventId) {
+                navigate(`/eventpage/${eventId}`);
+            }
+        },
+        [navigate]
+    );
 
     const handleDownloadCertificate = useCallback(async (eventId, eventTitle) => {
         try {
             setCertificateLoading((prev) => ({ ...prev, [eventId]: true }));
             setMessage(null);
-
             const token = localStorage.getItem("token");
-            const response = await api.post(`/certificates/${eventId}/create-certificate`, {}, {
-                headers: { Authorization: `Bearer ${token}` },
-                responseType: "blob",
-            });
-
+            const response = await api.post(
+                `/certificates/${eventId}/create-certificate`,
+                {},
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    responseType: "blob",
+                }
+            );
             const blob = new Blob([response.data], { type: "application/pdf" });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -73,7 +78,6 @@ export default function StudentDashboard() {
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
-
             setMessage("✅ Certificate downloaded successfully!");
         } catch (err) {
             setMessage(
@@ -85,7 +89,6 @@ export default function StudentDashboard() {
             setCertificateLoading((prev) => ({ ...prev, [eventId]: false }));
         }
     }, []);
-
 
     const handleRetry = useCallback(() => {
         fetchRegisteredEvents();
@@ -152,9 +155,7 @@ export default function StudentDashboard() {
             <div className="w-full max-w-2xl px-6 py-8 bg-white dark:bg-gray-900 rounded-lg shadow-xl">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold">Student Dashboard</h1>
-                    
                 </div>
-
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Registered Events</h2>
                     <div className="flex items-center space-x-2">
@@ -169,29 +170,27 @@ export default function StudentDashboard() {
                             onChange={handleCategoryChange}
                             value={selectedCategory}
                             className="py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-50 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            disabled={uniqueCategories.length === 0}
                             aria-label="Filter events by category"
                         >
                             <option value="All">All Categories</option>
-                            {uniqueCategories.length > 0 ? (
-                                uniqueCategories.map((category) => (
-                                    <option key={category} value={category}>
-                                        {category}
-                                    </option>
-                                ))
-                            ) : (
-                                <option disabled>No categories available</option>
-                            )}
+                            <option value="Technology">Technology</option>
+                            <option value="Business">Business</option>
+                            <option value="Science">Science</option>
+                            <option value="Health">Health</option>
+                            <option value="Education">Education</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Music">Music</option>
+                            <option value="Art">Art</option>
+                            <option value="Culture">Culture</option>
+                            <option value="Others">Others</option>
+                            {uniqueCategories.map((category) => (
+                                <option key={category} value={category}>
+                                    {category}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
-
-                {uniqueCategories.length === 0 && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        Category filtering is unavailable because no categories are defined for your registered events.
-                    </p>
-                )}
-
                 <div className="h-[400px] w-full overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700 p-4 space-y-4">
                     {filteredEvents.length > 0 ? (
                         filteredEvents.map((reg) => (
@@ -249,14 +248,12 @@ export default function StudentDashboard() {
                         </p>
                     )}
                 </div>
-
                 {message && (
                     <p className="text-center mt-4 text-sm font-medium text-gray-700 dark:text-gray-300">
                         {message}
                     </p>
                 )}
             </div>
-
             {showLogoutDialog && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
@@ -273,7 +270,7 @@ export default function StudentDashboard() {
                                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none"
                             >
                                 Cancel
-                            </button>                        
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -17,9 +17,6 @@ const Navbar = () => {
         </Link>
 
         <div className="flex items-center space-x-4">
-          <Link to="/" className="text-white hover:text-gray-200">
-            Home
-          </Link>
 
           {!user && (
             <>
