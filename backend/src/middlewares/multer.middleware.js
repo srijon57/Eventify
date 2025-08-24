@@ -1,15 +1,18 @@
 import multer from "multer";
 import fs from "fs";
+import path from "path";
 
-// Ensure folder exists
-const tempFolder = "./public/temp";
+// Use Vercel's /tmp directory for temporary files
+const tempFolder = path.join("/tmp", "uploads");
+
+// Ensure the folder exists
 if (!fs.existsSync(tempFolder)) {
     fs.mkdirSync(tempFolder, { recursive: true });
 }
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, tempFolder); // Now guaranteed to exist
+        cb(null, tempFolder); // Use the /tmp directory
     },
     filename: function (req, file, cb) {
         // Prepend timestamp to avoid collisions
@@ -17,6 +20,4 @@ const storage = multer.diskStorage({
     }
 });
 
-export const upload = multer({
-    storage,
-});
+export const upload = multer({ storage });
