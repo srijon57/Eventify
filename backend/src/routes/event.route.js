@@ -8,7 +8,9 @@ import {
     registerToEvent,
     unregisterFromEvent,
     getAllRegisteredUsersForEvent,
-    getRegisteredEventsForUser
+    getRegisteredEventsForUser,
+    sendEventEmail,
+    getPassedEvent
 } from "../controllers/event.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -21,18 +23,21 @@ router.route("/create-event")
     .post(verifyJWT, upload.fields([{ name: "image", maxCount: 1 }]), createEvent);
 
 router.route("/get-all-events")
-    .get(getAllEvents); 
-//made this above code public facing!!
+    .get(verifyJWT, getAllEvents);
 
 router.route("/registered-events")
     .get(verifyJWT, getRegisteredEventsForUser);
 
+router.route("/passed-events")
+    .get(verifyJWT, getPassedEvent);
+
+
+// Requires ID
 router.route("/:id") 
     .patch(verifyJWT, upload.fields([{ name: "image", maxCount: 1 }]), updateEvent);
 
 router.route("/:id")
-    .get(getEventId);
-    //made this above code public facing!!
+    .get(verifyJWT, getEventId);
 
 router.route("/:id")
     .delete(verifyJWT, deleteEvent);
@@ -45,5 +50,10 @@ router.route("/:event/unregister")
 
 router.route("/:event/registered-users")
     .get(verifyJWT, getAllRegisteredUsersForEvent);
+
+router.route("/:event/send-event-email")
+    .post(verifyJWT, sendEventEmail);
+
+
 
 export default router;
