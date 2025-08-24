@@ -1,37 +1,60 @@
-// src/pages/admin/AdminDashboard.jsx
-
-import React, { useState } from 'react';
- // Import the new EventForm component
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from "../../lib/api";
 import EventForm from './../EventForm/EventForm';
-
-// This is just mock data to simulate events created by the admin, now with categories
-const createdEvents = [
-  { id: 1, name: 'Tech Meetup 2024', description: 'Join us for a day of innovation and networking.', category: 'Tech' },
-  { id: 2, name: 'Web Dev Workshop', description: 'Learn the latest trends in web development.', category: 'Tech' },
-  { id: 3, name: 'Creative Writing Workshop', description: 'Unleash your inner writer.', category: 'Art & Culture' },
-  { id: 4, name: 'AI & Machine Learning', description: 'An introduction to AI, with hands-on labs.', category: 'Tech' },
-  { id: 5, name: 'Photography Basics', description: 'Learn to take stunning photos.', category: 'Art & Culture' },
-  { id: 6, name: 'Cybersecurity Conference', description: 'Explore the future of digital security.', category: 'Tech' },
-  { id: 7, name: 'UI/UX Design Masterclass', description: 'Master the principles of user-centric design.', category: 'Design' },
-];
 
 export default function AdminDashboard() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showEventForm, setShowEventForm] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await api.get("/events/get-all-events", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (!response.data.success) {
+          throw new Error(response.data.message || "Failed to fetch events.");
+        }
+
+        const fetchedEvents = response.data.data?.events || [];
+        setEvents(fetchedEvents);
+      } catch (err) {
+        console.error("Error fetching events:", err);
+        setError("Could not load events. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   const handlePostEvent = () => {
     setShowEventForm(true);
   };
-  
+
   const handleCancelForm = () => {
     setShowEventForm(false);
   };
-  
+
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
   };
 
-  const filteredEvents = createdEvents.filter(event => {
+  const handleNavigateToEvent = (eventId) => {
+    if (eventId) {
+      navigate(`/eventpage/${eventId}`);
+    }
+  };
+
+  const filteredEvents = events.filter(event => {
     if (selectedCategory === 'All') {
       return true;
     }
@@ -54,7 +77,7 @@ export default function AdminDashboard() {
               Post New Event
             </button>
           </div>
-  
+
           {/* Created Events Section */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Your Created Events</h2>
@@ -75,14 +98,26 @@ export default function AdminDashboard() {
               </select>
             </div>
           </div>
-          
+
           <div className="h-[400px] w-full overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700 p-4 space-y-4">
-            {filteredEvents.length > 0 ? (
+            {isLoading ? (
+              <p className="text-center text-gray-500 dark:text-gray-400">Loading events...</p>
+            ) : error ? (
+              <p className="text-center text-red-500">{error}</p>
+            ) : filteredEvents.length > 0 ? (
               filteredEvents.map(event => (
-                <div key={event.id} className="w-full bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm p-4 flex items-center space-x-4">
+                <div
+                  key={event._id}
+                  className="w-full bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm p-4 flex items-center space-x-4 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
+                  onClick={() => handleNavigateToEvent(event._id)}
+                >
                   <div>
-                    <h3 className="text-lg font-medium">{event.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{event.description}</p>
+                    <h3 className="text-lg font-medium hover:underline">
+                      {event.title || event.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {event.description}
+                    </p>
                   </div>
                 </div>
               ))
