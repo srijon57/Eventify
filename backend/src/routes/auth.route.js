@@ -21,7 +21,6 @@ router.route("/register").post(
     upload.fields([{ name: "avatar", maxCount: 1 }]),
     registerUser
 )
-
 router.route("/login").post(loginUser);
 
 // Secured Route

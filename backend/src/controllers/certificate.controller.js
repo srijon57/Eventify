@@ -10,7 +10,6 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import axios from "axios";
 
-
 const createCertificate = asyncHandler(async (req, res) => {
     const { event } = req.params; 
     const userId = req.user._id;
@@ -46,7 +45,6 @@ const createCertificate = asyncHandler(async (req, res) => {
     const filePath = path.join("certificates", `${user.username}_${eventDetails.title}.pdf`);
     doc.pipe(fs.createWriteStream(filePath));
 
-    // Border
     doc.rect(30, 30, doc.page.width - 60, doc.page.height - 60).stroke("#1f4e79");
 
 
@@ -63,7 +61,6 @@ const createCertificate = asyncHandler(async (req, res) => {
 
     doc.moveDown(10);
 
-    // Certificate Title
     doc
         .fontSize(32)
         .fillColor("#1f4e79")
@@ -71,7 +68,6 @@ const createCertificate = asyncHandler(async (req, res) => {
 
     doc.moveDown(2);
 
-    // Participant Info
     doc
         .fontSize(22)
         .fillColor("#000000")
@@ -93,7 +89,6 @@ const createCertificate = asyncHandler(async (req, res) => {
 
     doc.moveDown(1.5);
 
-    // Event Info
     doc
         .fontSize(20)
         .fillColor("#1f4e79")
@@ -107,7 +102,6 @@ const createCertificate = asyncHandler(async (req, res) => {
 
     doc.moveDown(0.5);
 
-    // Organizing Club
     doc
         .fontSize(18)
         .fillColor("#555555")

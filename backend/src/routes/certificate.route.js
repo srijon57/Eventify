@@ -8,7 +8,6 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-
 router.route("/:event/create-certificate")
     .post(verifyJWT, createCertificate);
 

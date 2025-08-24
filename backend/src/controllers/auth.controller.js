@@ -263,7 +263,7 @@ const updateUserAvatar = asyncHandler( async(req, res) => {
         req.user?._id,
         {
             $set:{
-                avatar: avatar.url
+                profileImage: avatar.url
             } 
         },
         {new : true}
@@ -286,5 +286,5 @@ export {
     getCurrentUser,
     changePassword,
     updateAccountDetails,
-    updateUserAvatar    
+    updateUserAvatar
 }
