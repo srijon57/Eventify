@@ -8,7 +8,9 @@ import {
     getCurrentUser,
     changePassword,
     updateAccountDetails,
-    updateUserAvatar
+    updateUserAvatar,
+    verifyOTP,
+    googleLogin,
 } from "../controllers/auth.controller.js";
 
 import { upload } from "../middlewares/multer.middleware.js"
@@ -21,16 +23,17 @@ router.route("/register").post(
     upload.fields([{ name: "avatar", maxCount: 1 }]),
     registerUser
 )
+router.post("/verify-otp", verifyOTP);
 router.route("/login").post(loginUser);
 
 // Secured Route
 router.route("/logout").post(verifyJWT, logoutUser);
 router.get("/current-user", verifyJWT, getCurrentUser);
 router.route("/change-password").post(verifyJWT, changePassword);
-router.route("/update-account").patch(verifyJWT, updateAccountDetails);
+router.route("/update-account").patch(verifyJWT, upload.none(), updateAccountDetails);
 router.route("/update-avatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
 
 router.post("/refresh-token", refreshAccessToken);
-
+router.route("/google").post(googleLogin);
 
 export default router;
