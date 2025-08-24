@@ -27,7 +27,7 @@ export default function StudentDashboard() {
                 },
             });
             console.log("Fetched events:", response.data); // Debug log
-            setRegisteredEvents(response.data.data || []);
+            setRegisteredEvents(response.data.data.dashboardEvents || []);
         } catch (err) {
             console.error("Error fetching events:", err); // Debug log
             setError(
@@ -148,16 +148,20 @@ export default function StudentDashboard() {
                                 className="w-full bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm p-4 flex items-center space-x-4"
                             >
                                 <img
-                                    src={reg.event.image}
-                                    alt={reg.event.title}
+                                    src={reg.event?.image || "https://placehold.co/100x100/333333/FFFFFF?text=Image+Not+Found"}
+                                    alt={reg.event?.title || "Event"}
                                     className="w-16 h-16 object-cover rounded-md flex-shrink-0"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "https://placehold.co/100x100/333333/FFFFFF?text=Image+Not+Found";
+                                    }}
                                 />
                                 <div>
                                     <h3 className="text-lg font-medium">
-                                        {reg.event.title}
+                                        {reg.event?.title || "Untitled Event"}
                                     </h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                        {reg.event.description}
+                                        {reg.event?.description || "No description available"}
                                     </p>
                                 </div>
                             </div>
