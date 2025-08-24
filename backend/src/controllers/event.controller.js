@@ -3,8 +3,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { Registration } from "../models/registration.model.js";
-import { User } from "../models/user.model.js";
+import { Registration } from "../models/Registration.model.js";
+import { User } from "../models/User.model.js";
 import { sendEmail } from "../utils/sendEmail.js";
 
 const createEvent = asyncHandler(async (req, res) => {

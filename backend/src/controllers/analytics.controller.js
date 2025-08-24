@@ -2,7 +2,7 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Event } from "../models/Event.model.js";
-import { Registration } from "../models/registration.model.js";
+import { Registration } from "../models/Registration.model.js";
 
 
 const getTopAttendedEvent = asyncHandler(async (req, res) => {
