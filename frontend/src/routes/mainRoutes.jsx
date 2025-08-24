@@ -8,7 +8,7 @@ import StudentDashboard from "../pages/StudentDashboard/StudentDashboard.jsx";
 import AdminDashboard from "../pages/AdminDashboard/AdminDashboard.jsx";
 import Contact from "../components/Contact/Contact.jsx";
 import Profile from "../pages/Profile/Profile.jsx";
-import VerifyOTP from "../pages/Register/Verifyotp.jsx";
+import VerifyOTP from "../pages/Register/VerifyOTP.jsx";
 import EventPage from '../pages/EventPage/EventPage.jsx';
 
 const mainRoutes = [
