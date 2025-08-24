@@ -1,21 +1,64 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import HeroImage from "@/assets/Hero.jpg";
-
-const events = [
-  { title: "Tech Meetup 2024", description: "Join us for a day of innovation and networking." },
-  { title: "Web Dev Workshop", description: "Learn the latest trends in web development." },
-  { title: "AI & Machine Learning", description: "An introduction to AI, with hands-on labs." },
-  { title: "Startup Pitch Night", description: "Pitch your ideas to top investors and mentors." },
-  { title: "Blockchain Seminar", description: "Explore blockchain technology and its applications." },
-];
+import { useNavigate } from "react-router-dom";
+import api from "../../lib/api"; // Import the configured Axios instance
 
 export default function HomePage() {
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await api.get("/events/get-all-events", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (!response.data.success) {
+          throw new Error(response.data.message || "Failed to fetch events.");
+        }
+
+        const fetchedEvents = response.data.data?.events || [];
+        setEvents(fetchedEvents);
+      } catch (err) {
+        console.error("Error fetching events:", err);
+        setError("Could not load events. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    const fetchTopEvent = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await api.get("/api/v1/analytics/top-attended-event", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        setTopEvent(res.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchTopEvent();
+  }, []);
+
+
+  const handleNavigateToEvent = (eventId) => {
+    navigate(`/eventpage/${eventId}`);
+  };
+
   return (
     <div className="flex flex-col items-center justify-start min-h-screen p-6 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      
       {/* Hero Section */}
       <motion.section
         initial={{ opacity: 0, y: -50 }}
@@ -41,29 +84,41 @@ export default function HomePage() {
           transition={{ duration: 1 }}
         />
       </motion.section>
-
-      {/* Featured Events */}
-      <section className="w-full max-w-6xl">
-        <h2 className="text-3xl font-semibold mb-6">Featured Events</h2>
+      {/* Top Registered Events */}
+      <section className="w-full max-w-6xl mt-12">
+        <h2 className="text-3xl font-semibold mb-6 text-blue-600 dark:text-blue-400">
+          Top Registered Events
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => (
+          {events.slice(1, 2).map((event) => ( // adjust slice as needed
             <motion.div
-              key={event.title}
+              key={event._id + "-registered"}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.12)" }}
+              whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
             >
-              <Card className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="w-full bg-blue-50 dark:bg-blue-900 border-blue-300 dark:border-blue-700">
                 <CardHeader>
-                  <CardTitle className="text-gray-900 dark:text-gray-100">{event.title}</CardTitle>
+                  <CardTitle className="text-blue-900 dark:text-blue-100">
+                    {event.title}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-500 dark:text-gray-300 mb-4">{event.description}</p>
+                  {event.image && (
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-48 object-cover rounded-md mb-4"
+                      />
+                    )}
+                  <p className="text-sm text-blue-800 dark:text-blue-200 mb-4">
+                    {event.description}
+                  </p>
                   <div className="flex justify-end">
                     <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
-                      <Button>View Details</Button>
+                      <Button onClick={() => handleNavigateToEvent(event._id)}>View Details</Button>
                     </motion.div>
                   </div>
                 </CardContent>
@@ -73,6 +128,96 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Top Viewed Events */}
+      <section className="w-full max-w-6xl mt-12 mb-20">
+        <h2 className="text-3xl font-semibold mb-6 text-green-600 dark:text-green-400">
+          Top Viewed Events
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.slice(1, 2).map((event) => ( 
+            <motion.div
+              key={event._id + "-viewed"}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+            >
+              <Card className="w-full bg-green-50 dark:bg-green-900 border-green-300 dark:border-green-700">
+                <CardHeader>
+                  <CardTitle className="text-green-900 dark:text-green-100">
+                    {event.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {event.image && (
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-48 object-cover rounded-md mb-4"
+                      />
+                    )}
+                  <p className="text-sm text-green-800 dark:text-green-200 mb-4">
+                    {event.description}
+                  </p>
+                  <div className="flex justify-end">
+                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
+                      <Button onClick={() => handleNavigateToEvent(event._id)}>View Details</Button>
+                    </motion.div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+      {/* Featured Events */}
+      <section className="w-full max-w-6xl">
+        <h2 className="text-3xl font-semibold mb-6">Featured Events</h2>
+        {isLoading ? (
+          <div className="text-center text-gray-500 dark:text-gray-400">Loading events...</div>
+        ) : error ? (
+          <div className="text-center text-red-500">{error}</div>
+        ) : events.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event) => (
+              <motion.div
+                key={event._id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.12)" }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4 }}
+              >
+                <Card className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-gray-900 dark:text-gray-100">{event.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {event.image && (
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-48 object-cover rounded-md mb-4"
+                      />
+                    )}
+                    <p className="text-sm text-gray-500 dark:text-gray-300 mb-4">{event.description}</p>
+                    <div className="flex justify-end">
+                      <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
+                        <Button onClick={() => handleNavigateToEvent(event._id)}>View Details</Button>
+                      </motion.div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-gray-500 dark:text-gray-400">No events found.</div>
+        )}
+      </section>
+        
+      
       {/* Newsletter / Call-to-Action */}
       <motion.section
         initial={{ opacity: 0, y: 50 }}
@@ -89,6 +234,8 @@ export default function HomePage() {
             type="email"
             placeholder="Enter your email"
             className="px-4 py-2 border rounded-md flex-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+            id="email-newsletter"
+            name="email-newsletter"
           />
           <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
             <Button>Subscribe</Button>

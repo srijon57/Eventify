@@ -16,7 +16,7 @@ async function getGeminiAnswer(question, faqs) {
     const prompt = `
         You are a chatbot for Eventify. Below is a list of FAQs with their questions, keywords, and answers. 
         Try to answer the user's question based on the provided FAQs if possible. 
-        If no relevant FAQ is found, provide a general answer based on your knowledge about Eventify.
+        If no relevant FAQ is found, provide a general answer based on your knowledge about Eventify. Give the answer in one or two sentences only.
 
         FAQs:
         ${faqContent}

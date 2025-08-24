@@ -23,6 +23,10 @@ const eventSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    registrationDeadline: {
+      type: Date,
+      default: null,
+    },
     category: {
       type: String,
       required: true,
@@ -38,6 +42,16 @@ const eventSchema = new mongoose.Schema(
       required: true,
     },
     participantsCount: {
+      type: Number,
+      default: 0,
+    },
+    viewedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      }
+    ],
+    viewsCount: {
       type: Number,
       default: 0,
     },
