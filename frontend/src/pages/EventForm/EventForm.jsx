@@ -1,4 +1,5 @@
 // src/pages/admin/EventForm.jsx
+import api from "../../lib/api";
 
 import React, { useState } from 'react';
 
@@ -26,57 +27,45 @@ export default function EventForm({ onCancel }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  e.preventDefault();
+  setIsLoading(true);
+  setError(null);
 
-    const data = new FormData();
-    data.append('title', formData.title);
-    data.append('description', formData.description);
-    data.append('location', formData.location);
-    data.append('eventTime', new Date(formData.eventTime).toISOString());
-    data.append('category', formData.category);
-    data.append('organizingClub', formData.organizingClub);
-    
-    if (formData.image) {
-      data.append('image', formData.image);
-    }
-    
-    try {
-      const response = await fetch('http://localhost:8000/api/v1/events/create-event', {
-        method: 'POST',
-        // Add this line to send the cookies with the request
-        credentials: 'include',
-        body: data,
-      });
+  const data = new FormData();
+  data.append("title", formData.title);
+  data.append("description", formData.description);
+  data.append("location", formData.location);
+  data.append("eventTime", new Date(formData.eventTime).toISOString());
+  data.append("category", formData.category);
+  data.append("organizingClub", formData.organizingClub);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to post event.');
-      }
+  if (formData.image) {
+    data.append("image", formData.image);
+  }
 
-      const result = await response.json();
-      console.log('Event successfully posted:', result);
-      
-      setFormData({
-        title: '',
-        description: '',
-        location: '',
-        eventTime: '',
-        category: '',
-        organizingClub: '',
-        image: null,
-      });
-      onCancel();
+  try {
+    const response = await api.post("/events/create-event", data); 
+    // no need to add base URL or credentials manually
+    const result = response.data;
+    console.log("Event successfully posted:", result);
 
-    } catch (err) {
-      console.error('Error posting event:', err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+    setFormData({
+      title: "",
+      description: "",
+      location: "",
+      eventTime: "",
+      category: "",
+      organizingClub: "",
+      image: null,
+    });
+    onCancel();
+  } catch (err) {
+    console.error("Error posting event:", err);
+    setError(err.response?.data?.message || err.message || "Failed to post event.");
+  } finally {
+    setIsLoading(false);
+  }
+};
   return (
     <div className="w-full max-w-2xl px-6 py-8 bg-white dark:bg-gray-900 rounded-lg shadow-xl">
       <h2 className="text-2xl font-bold mb-4">Create New Event</h2>

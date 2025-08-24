@@ -1,6 +1,7 @@
+// src/pages/EventPage/EventPage.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../../lib/api"; // Import the configured Axios instance
+import api from "../../lib/api";
 
 export default function EventPage() {
   const { id } = useParams();
@@ -20,23 +21,8 @@ export default function EventPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setUser(null);
-          return;
-        }
-
-        const response = await api.get("/auth/current-user", {
-          headers: {
-            Authorization: Bearer ${token},
-          },
-        });
-
-        if (response.data.success) {
-          setUser(response.data.data);
-        } else {
-          setUser(null);
-        }
+        const res = await api.get("/auth/current-user"); // uses baseURL & credentials
+        setUser(res.data.data);
       } catch (err) {
         console.error("Error fetching user:", err);
         setUser(null);
@@ -49,19 +35,10 @@ export default function EventPage() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await api.get(/events/${id}, {
-          headers: token ? { Authorization: Bearer ${token} } : {},
-        });
-
-        if (response.data.success) {
-          setEvent(response.data.data);
-        } else {
-          setEvent(null);
-        }
+        const res = await api.get(`/events/${id}`);
+        setEvent(res.data.data.event);
       } catch (err) {
         console.error("Error fetching event:", err);
-        setEvent(null);
       } finally {
         setLoading(false);
       }
@@ -80,27 +57,17 @@ export default function EventPage() {
       setRegistering(true);
       setMessage(null);
 
-      const token = localStorage.getItem("token");
-      const response = await api.post(
-        /events/${id}/register,
-        { studentId, department },
-        {
-          headers: {
-            Authorization: Bearer ${token},
-          },
-        }
-      );
+      const res = await api.post(`/events/${id}/register`, {
+        studentId,
+        department,
+      });
 
-      if (response.data.success) {
-        setMessage("✅ Successfully registered!");
-        setEvent((prev) => ({
-          ...prev,
-          participantsCount: prev.participantsCount + 1,
-        }));
-        setShowRegisterForm(false);
-      } else {
-        throw new Error(response.data.message || "Registration failed");
-      }
+      setMessage("✅ Successfully registered!");
+      setEvent((prev) => ({
+        ...prev,
+        participantsCount: prev.participantsCount + 1,
+      }));
+      setShowRegisterForm(false);
     } catch (err) {
       console.error("Error registering:", err);
       setMessage("❌ " + (err.response?.data?.message || err.message));
@@ -142,17 +109,16 @@ export default function EventPage() {
 
         <div className="flex items-center gap-3 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm">
           <img
-            src={event.createdBy?.profileImage}
-            alt={event.createdBy?.username}
+            src={event.createdBy.profileImage}
+            alt={event.createdBy.username}
             className="w-12 h-12 rounded-full object-cover"
           />
           <div>
-            <p className="font-semibold">{event.createdBy?.username}</p>
-            <p className="text-sm text-gray-500">{event.createdBy?.email}</p>
+            <p className="font-semibold">{event.createdBy.username}</p>
+            <p className="text-sm text-gray-500">{event.createdBy.email}</p>
           </div>
         </div>
 
-        {/* Register button */}
         {user ? (
           <>
             <button
@@ -163,7 +129,6 @@ export default function EventPage() {
               {registering ? "Registering..." : "Register for Event"}
             </button>
 
-            {/* Registration form modal */}
             {showRegisterForm && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-80 space-y-4">

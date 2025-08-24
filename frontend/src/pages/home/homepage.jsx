@@ -1,11 +1,11 @@
 // src/pages/HomePage.jsx
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import HeroImage from "@/assets/Hero.jpg";
 import { useNavigate } from "react-router-dom";
+import api from "../../lib/api"; // Use the axios instance
 
 export default function HomePage() {
   const [events, setEvents] = useState([]);
@@ -16,22 +16,9 @@ export default function HomePage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/v1/events/get-all-events", {
-          method: 'GET',
-          credentials: 'include', // Ensure cookies are sent with the request
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch events.");
-        }
-
-        const result = await response.json();
-        
-        // This line is updated to handle different response formats more gracefully
-        // It checks if `result.data` and `result.data.events` exist
-        const fetchedEvents = result.data?.events || [];
+        const res = await api.get("/events/get-all-events"); // uses baseURL & credentials
+        const fetchedEvents = res.data?.data?.events || [];
         setEvents(fetchedEvents);
-
       } catch (err) {
         console.error("Error fetching events:", err);
         setError("Could not load events. Please try again later.");
@@ -44,7 +31,6 @@ export default function HomePage() {
   }, []);
 
   const handleNavigateToEvent = (eventId) => {
-    // UPDATED: Navigating to '/eventpage/:id' to match your existing route configuration.
     navigate(`/eventpage/${eventId}`);
   };
 
@@ -132,7 +118,6 @@ export default function HomePage() {
             type="email"
             placeholder="Enter your email"
             className="px-4 py-2 border rounded-md flex-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-            // ADDED id AND name ATTRIBUTES TO FIX THE CONSOLE WARNING
             id="email-newsletter"
             name="email-newsletter"
           />
