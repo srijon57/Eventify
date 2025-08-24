@@ -86,12 +86,6 @@ export default function StudentDashboard() {
         }
     }, []);
 
-    const handleLogout = useCallback(() => {
-        localStorage.removeItem("token");
-        setUser(null);
-        setShowLogoutDialog(false);
-        navigate("/login");
-    }, [navigate, setUser]);
 
     const handleRetry = useCallback(() => {
         fetchRegisteredEvents();
@@ -158,12 +152,7 @@ export default function StudentDashboard() {
             <div className="w-full max-w-2xl px-6 py-8 bg-white dark:bg-gray-900 rounded-lg shadow-xl">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold">Student Dashboard</h1>
-                    <button
-                        onClick={() => setShowLogoutDialog(true)}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                    >
-                        Logout
-                    </button>
+                    
                 </div>
 
                 <div className="flex justify-between items-center mb-4">
@@ -284,13 +273,7 @@ export default function StudentDashboard() {
                                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none"
                             >
                                 Cancel
-                            </button>
-                            <button
-                                onClick={handleLogout}
-                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none"
-                            >
-                                Logout
-                            </button>
+                            </button>                        
                         </div>
                     </div>
                 </div>
