@@ -41,7 +41,7 @@ export default function HomePage() {
     const fetchTopEvent = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await api.get("/api/v1/analytics/top-attended-event", {
+        const res = await api.get("/analytics/top-attended-event", {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         setTopEvent(res.data.data);
