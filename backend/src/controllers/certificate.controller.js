@@ -35,12 +35,12 @@ const createCertificate = asyncHandler(async (req, res) => {
         return res.download(existing.certificateUrl);
     }
 
-    // const now = new Date();
-    // const oneWeekAfterEvent = new Date(eventDetails.eventTime.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const oneWeekAfterEvent = new Date(eventDetails.eventTime.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    // if (now < oneWeekAfterEvent) {
-    //     return res.status(400).json(new ApiResponse(400, null, "Certificates can be generated only after one week of event completion"));
-    // }
+    if (now < oneWeekAfterEvent) {
+        return res.status(400).json(new ApiResponse(400, null, "Certificates can be generated only after one week of event completion"));
+    }
 
     const user = await User.findById(userId);
 
