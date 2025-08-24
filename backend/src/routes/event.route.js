@@ -8,7 +8,8 @@ import {
     registerToEvent,
     unregisterFromEvent,
     getAllRegisteredUsersForEvent,
-    getRegisteredEventsForUser
+    getRegisteredEventsForUser,
+    sendEventEmail
 } from "../controllers/event.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -43,5 +44,8 @@ router.route("/:event/unregister")
 
 router.route("/:event/registered-users")
     .get(verifyJWT, getAllRegisteredUsersForEvent);
+
+router.route("/:event/send-event-email")
+    .post(verifyJWT, sendEventEmail);
 
 export default router;
