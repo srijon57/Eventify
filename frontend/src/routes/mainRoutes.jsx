@@ -22,7 +22,9 @@ const mainRoutes = [
   <Route key="verify-otp" path="/verify-otp" element={<VerifyOTP />} />,
   <Route key="studentdashboard" path="/studentdashboard" element={<StudentDashboard />} />,
   <Route key="admindashboard" path="/admindashboard" element={<AdminDashboard />} />,
-  <Route path="/eventpage/:id" element={<EventPage />} />,
+  <Route key="event-page" path="/eventpage/:id" element={<EventPage />} />
+
+
 ];
 
 export default mainRoutes;

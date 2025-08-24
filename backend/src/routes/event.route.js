@@ -9,7 +9,8 @@ import {
     unregisterFromEvent,
     getAllRegisteredUsersForEvent,
     getRegisteredEventsForUser,
-    sendEventEmail
+    sendEventEmail,
+    getPassedEvent
 } from "../controllers/event.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -27,6 +28,11 @@ router.route("/get-all-events")
 router.route("/registered-events")
     .get(verifyJWT, getRegisteredEventsForUser);
 
+router.route("/passed-events")
+    .get(verifyJWT, getPassedEvent);
+
+
+// Requires ID
 router.route("/:id") 
     .patch(verifyJWT, upload.fields([{ name: "image", maxCount: 1 }]), updateEvent);
 
@@ -47,5 +53,7 @@ router.route("/:event/registered-users")
 
 router.route("/:event/send-event-email")
     .post(verifyJWT, sendEventEmail);
+
+
 
 export default router;
