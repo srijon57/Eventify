@@ -9,8 +9,9 @@ import AdminDashboard from "../pages/AdminDashboard/AdminDashboard.jsx";
 import Contact from "../components/Contact/Contact.jsx";
 import Profile from "../pages/Profile/Profile.jsx";
 import VerifyOTP from "../pages/Register/VerifyOTP.jsx";
-import EventPage from '../pages/EventPage/EventPage.jsx';
-import ParticipantsPage from "../pages/EventPage/ParticipantsPage";
+import EventPage from '../pages/EventCardPage/EventCardPage.jsx';
+import ParticipantsPage from "../pages/EventCardPage/ParticipantsPage";
+import EventsPage from "../pages/EventPage/EventsPage";
 
 const mainRoutes = [
   <Route key="home" path="/" element={<Homepage />} />,
@@ -24,7 +25,8 @@ const mainRoutes = [
   <Route key="studentdashboard" path="/studentdashboard" element={<StudentDashboard />} />,
   <Route key="admindashboard" path="/admindashboard" element={<AdminDashboard />} />,
   <Route key="event-page" path="/eventpage/:id" element={<EventPage />} />,
-  <Route key="participants" path="/events/:id/participants" element={<ParticipantsPage />} />
+  <Route key="participants" path="/events/:id/participants" element={<ParticipantsPage />} />,
+  <Route path="/events" element={<EventsPage />} />
 
 ];
 
