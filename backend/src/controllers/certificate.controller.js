@@ -32,7 +32,13 @@ const createCertificate = asyncHandler(async (req, res) => {
         event: eventDetails._id,
     });
     if (existing) {
-        return res.download(existing.certificateUrl);
+        // Check if file actually exists
+        if (fs.existsSync(existing.certificateUrl)) {
+            return res.download(existing.certificateUrl);
+        } else {
+            // If file doesn't exist, remove the database entry and regenerate
+            await Certificate.findByIdAndDelete(existing._id);
+        }
     }
 
     const now = new Date();
@@ -45,101 +51,130 @@ const createCertificate = asyncHandler(async (req, res) => {
     const user = await User.findById(userId);
 
     const doc = new PDFDocument();
-    if (!fs.existsSync("certificates")) {
-        fs.mkdirSync("certificates");
+    
+    // Create certificates directory if it doesn't exist
+    const certificatesDir = path.join(process.cwd(), "certificates");
+    if (!fs.existsSync(certificatesDir)) {
+        fs.mkdirSync(certificatesDir, { recursive: true });
     }
-    const filePath = path.join(
-        "certificates",
-        `${user.username}_${eventDetails.title}.pdf`
-    );
-    doc.pipe(fs.createWriteStream(filePath));
+    
+    // Fix: Ensure .pdf extension is included in the filename
+    const filename = `${user.username}_${eventDetails.title}_${Date.now()}.pdf`
+        .replace(/[^a-zA-Z0-9._-]/g, '_')
+        .replace(/\s+/g, '_');
+    
+    const filePath = path.join(certificatesDir, filename);
 
-    doc.rect(30, 30, doc.page.width - 60, doc.page.height - 60).stroke(
-        "#1f4e79"
-    );
+    return new Promise(async (resolve, reject) => {
+        const writeStream = fs.createWriteStream(filePath);
+        doc.pipe(writeStream);
 
-    if (eventDetails.image) {
-        try {
-            const response = await axios.get(eventDetails.image, {
-                responseType: "arraybuffer",
-            });
-            const imgBuffer = Buffer.from(response.data, "binary");
-            const imgX = doc.page.width / 2 - 100;
-            doc.image(imgBuffer, imgX, 50, { width: 200 });
-        } catch (err) {
-            console.warn("Could not load event image:", err.message);
+        doc.rect(30, 30, doc.page.width - 60, doc.page.height - 60).stroke(
+            "#1f4e79"
+        );
+
+        if (eventDetails.image) {
+            try {
+                const response = await axios.get(eventDetails.image, {
+                    responseType: "arraybuffer",
+                });
+                const imgBuffer = Buffer.from(response.data, "binary");
+                const imgX = doc.page.width / 2 - 100;
+                doc.image(imgBuffer, imgX, 50, { width: 200 });
+            } catch (err) {
+                console.warn("Could not load event image:", err.message);
+            }
         }
-    }
 
-    doc.moveDown(10);
+        doc.moveDown(10);
 
-    doc.fontSize(32)
-        .fillColor("#1f4e79")
-        .text("Certificate of Participation", {
-            align: "center",
-            underline: true,
+        doc.fontSize(32)
+            .fillColor("#1f4e79")
+            .text("Certificate of Participation", {
+                align: "center",
+                underline: true,
+            });
+
+        doc.moveDown(2);
+
+        doc.fontSize(22)
+            .fillColor("#000000")
+            .text(`This is to certify that`, { align: "center" });
+
+        doc.font("Helvetica-Bold")
+            .fontSize(26)
+            .fillColor("#333333")
+            .text(`${user.username.toUpperCase()}`, { align: "center" });
+
+        doc.moveDown(0.5);
+
+        doc.font("Times-Roman")
+            .fontSize(18)
+            .text(`Student ID: ${user.studentId}`, { align: "center" })
+            .text(`Department: ${user.department}`, { align: "center" });
+
+        doc.moveDown(1.5);
+
+        doc.fontSize(20)
+            .fillColor("#1f4e79")
+            .text(`has participated in`, { align: "center" });
+
+        doc.font("Helvetica-BoldOblique")
+            .fontSize(24)
+            .fillColor("#000000")
+            .text(`${eventDetails.title}`, { align: "center" });
+
+        doc.moveDown(1);
+        doc.fontSize(14)
+            .fillColor("#555555")
+            .text(`Date: ${new Date().toLocaleDateString()}`, { align: "center" });
+
+        doc.moveDown(0.5);
+
+        doc.fontSize(18)
+            .fillColor("#555555")
+            .text(`Organized by: ${eventDetails.organizingClub}`, {
+                align: "center",
+            });
+
+        doc.moveDown(1);
+        doc.fontSize(14)
+            .fillColor("#555555")
+            .text(`Powered By Eventify`, { align: "center" });
+
+        doc.moveDown(3);
+
+        doc.end();
+
+        writeStream.on('finish', async () => {
+            try {
+                const certificate = new Certificate({
+                    user: userId,
+                    event: eventDetails._id,
+                    certificateUrl: filePath,
+                });
+                await certificate.save();
+
+                const downloadFilename = `certificate_${eventDetails.title}_${user.username}.pdf`
+                    .replace(/[^a-zA-Z0-9._-]/g, '_')
+                    .replace(/\s+/g, '_');
+
+                res.download(filePath, downloadFilename, (err) => {
+                    if (err) {
+                        reject(new ApiError(500, "Error sending certificate file"));
+                    } else {
+                        resolve();
+                    }
+                });
+            } catch (error) {
+                reject(error);
+            }
         });
 
-    doc.moveDown(2);
-
-    doc.fontSize(22)
-        .fillColor("#000000")
-        .text(`This is to certify that`, { align: "center" });
-
-    doc.font("Helvetica-Bold")
-        .fontSize(26)
-        .fillColor("#333333")
-        .text(`${user.username.toUpperCase()}`, { align: "center" });
-
-    doc.moveDown(0.5);
-
-    doc.font("Times-Roman")
-        .fontSize(18)
-        .text(`Student ID: ${user.studentId}`, { align: "center" })
-        .text(`Department: ${user.department}`, { align: "center" });
-
-    doc.moveDown(1.5);
-
-    doc.fontSize(20)
-        .fillColor("#1f4e79")
-        .text(`has participated in`, { align: "center" });
-
-    doc.font("Helvetica-BoldOblique")
-        .fontSize(24)
-        .fillColor("#000000")
-        .text(`${eventDetails.title}`, { align: "center" });
-
-    doc.moveDown(1);
-    doc.fontSize(14)
-        .fillColor("#555555")
-        .text(`Date: ${new Date().toLocaleDateString()}`, { align: "center" });
-
-    doc.moveDown(0.5);
-
-    doc.fontSize(18)
-        .fillColor("#555555")
-        .text(`Organized by: ${eventDetails.organizingClub}`, {
-            align: "center",
+        writeStream.on('error', (error) => {
+            reject(new ApiError(500, "Error creating certificate file"));
         });
-
-    doc.moveDown(1);
-    doc.fontSize(14)
-        .fillColor("#555555")
-        .text(`Powered By Eventify`, { align: "center" });
-
-    doc.moveDown(3);
-
-    doc.end();
-
-    const certificate = new Certificate({
-        user: userId,
-        event: eventDetails._id,
-        certificateUrl: filePath,
-    });
-    await certificate.save();
-
-    res.download(filePath, (err) => {
-        if (err) throw new ApiError(500, "Error sending certificate file");
     });
 });
+
 export { createCertificate };

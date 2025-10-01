@@ -60,33 +60,77 @@ export default function StudentDashboard() {
         try {
             setCertificateLoading((prev) => ({ ...prev, [eventId]: true }));
             setMessage(null);
+            
             const token = localStorage.getItem("token");
             const response = await api.post(
                 `/certificates/${eventId}/create-certificate`,
                 {},
                 {
-                    headers: { Authorization: `Bearer ${token}` },
-                    responseType: "blob",
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                    },
+                    responseType: "blob", // Important for file downloads
                 }
             );
-            const blob = new Blob([response.data], { type: "application/pdf" });
+
+            // Create a blob from the PDF data
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            
+            // Create a temporary URL for the blob
             const url = window.URL.createObjectURL(blob);
-            const link = document.createElement("a");
+            
+            // Create a temporary link element
+            const link = document.createElement('a');
             link.href = url;
-            link.download = `certificate_${eventTitle || "event"}.pdf`;
+            
+            // Set the download filename
+            const fileName = `certificate_${eventTitle || 'event'}.pdf`;
+            link.download = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+            
+            // Append to body, click, and remove
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            
+            // Revoke the object URL
             window.URL.revokeObjectURL(url);
+            
             setMessage("✅ Certificate downloaded successfully!");
         } catch (err) {
-            setMessage(
-                "❌ " +
-                    (err.response?.data?.message ||
-                        "Failed to download certificate. Please try again.")
-            );
+            console.error("Certificate download error:", err);
+            
+            let errorMessage = "Failed to download certificate. Please try again.";
+            
+            if (err.response?.data) {
+                // Handle different types of error responses
+                if (err.response.data instanceof Blob) {
+                    // If it's a blob, try to read it as text
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        try {
+                            const errorData = JSON.parse(reader.result);
+                            setMessage(`❌ ${errorData.message || errorMessage}`);
+                        } catch {
+                            setMessage(`❌ ${errorMessage}`);
+                        }
+                    };
+                    reader.readAsText(err.response.data);
+                    return;
+                } else if (err.response.data.message) {
+                    errorMessage = err.response.data.message;
+                }
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+            
+            setMessage(`❌ ${errorMessage}`);
         } finally {
             setCertificateLoading((prev) => ({ ...prev, [eventId]: false }));
+            
+            // Clear message after 5 seconds
+            setTimeout(() => {
+                setMessage(null);
+            }, 5000);
         }
     }, []);
 
@@ -233,12 +277,34 @@ export default function StudentDashboard() {
                                         )
                                     }
                                     disabled={certificateLoading[reg.event?._id]}
-                                    className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 text-sm"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 text-sm flex items-center space-x-2 min-w-[140px] justify-center transition-colors duration-200"
                                     aria-label={`Download certificate for ${reg.event?.title || "event"}`}
                                 >
-                                    {certificateLoading[reg.event?._id]
-                                        ? "Generating..."
-                                        : "Certificate"}
+                                    {certificateLoading[reg.event?._id] ? (
+                                        <>
+                                            <svg 
+                                                className="animate-spin h-4 w-4 text-white" 
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <circle 
+                                                    className="opacity-25" 
+                                                    cx="12" 
+                                                    cy="12" 
+                                                    r="10" 
+                                                    stroke="currentColor" 
+                                                    strokeWidth="4"
+                                                />
+                                                <path 
+                                                    className="opacity-75" 
+                                                    fill="currentColor" 
+                                                    d="M4 12a8 8 0 018-8v8z" 
+                                                />
+                                            </svg>
+                                            <span>Generating...</span>
+                                        </>
+                                    ) : (
+                                        "Download Certificate"
+                                    )}
                                 </button>
                             </motion.div>
                         ))
@@ -249,9 +315,17 @@ export default function StudentDashboard() {
                     )}
                 </div>
                 {message && (
-                    <p className="text-center mt-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`mt-4 p-3 rounded-md text-center text-sm font-medium ${
+                            message.includes('❌') 
+                                ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
+                                : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+                        }`}
+                    >
                         {message}
-                    </p>
+                    </motion.div>
                 )}
             </div>
             {showLogoutDialog && (
