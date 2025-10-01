@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import HeroImage from "@/assets/Hero.jpg";
 import { useNavigate } from "react-router-dom";
-import api from "../../lib/api"; // Import the configured Axios instance
+import api from "../../lib/api"; 
 
 export default function HomePage() {
   const [events, setEvents] = useState([]);

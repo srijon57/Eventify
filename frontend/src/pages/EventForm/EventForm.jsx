@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import api from '../../lib/api'; 
+
 export default function EventForm({ onCancel }) {
   const [formData, setFormData] = useState({
     title: '',
@@ -8,6 +9,7 @@ export default function EventForm({ onCancel }) {
     eventTime: '',
     category: '',
     organizingClub: '',
+    registrationDeadline: '',
     image: null,
   });
 
@@ -36,6 +38,10 @@ export default function EventForm({ onCancel }) {
     data.append('category', formData.category);
     data.append('organizingClub', formData.organizingClub);
     
+    if (formData.registrationDeadline) {
+      data.append('registrationDeadline', new Date(formData.registrationDeadline).toISOString());
+    }
+    
     if (formData.image) {
       data.append('image', formData.image);
     }
@@ -49,26 +55,26 @@ export default function EventForm({ onCancel }) {
       const response = await api.post('/events/create-event', data, {
         headers: {
           Authorization: `Bearer ${token}`,
-          // Note: FormData automatically sets the correct Content-Type (multipart/form-data) with boundary
+          'Content-Type': 'multipart/form-data',
         },
       });
 
-      if (!response.data.success) {
+      if (response.data.success) {
+        console.log('Event successfully posted:', response.data);
+        setFormData({
+          title: '',
+          description: '',
+          location: '',
+          eventTime: '',
+          category: '',
+          organizingClub: '',
+          registrationDeadline: '',
+          image: null,
+        });
+        onCancel();
+      } else {
         throw new Error(response.data.message || 'Failed to post event.');
       }
-
-      console.log('Event successfully posted:', response.data);
-
-      setFormData({
-        title: '',
-        description: '',
-        location: '',
-        eventTime: '',
-        category: '',
-        organizingClub: '',
-        image: null,
-      });
-      onCancel();
 
     } catch (err) {
       console.error('Error posting event:', err);
@@ -84,7 +90,7 @@ export default function EventForm({ onCancel }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Event Title
+            Event Title *
           </label>
           <input
             type="text"
@@ -96,9 +102,10 @@ export default function EventForm({ onCancel }) {
             required
           />
         </div>
+        
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Description
+            Description *
           </label>
           <textarea
             id="description"
@@ -110,9 +117,10 @@ export default function EventForm({ onCancel }) {
             required
           />
         </div>
+        
         <div>
           <label htmlFor="image" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Image
+            Event Image *
           </label>
           <input
             type="file"
@@ -121,11 +129,13 @@ export default function EventForm({ onCancel }) {
             accept="image/*"
             onChange={handleInputChange}
             className="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+            required
           />
         </div>
+        
         <div>
           <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Location
+            Location *
           </label>
           <input
             type="text"
@@ -137,9 +147,10 @@ export default function EventForm({ onCancel }) {
             required
           />
         </div>
+        
         <div>
           <label htmlFor="eventTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Event Date & Time
+            Event Date & Time *
           </label>
           <input
             type="datetime-local"
@@ -151,23 +162,49 @@ export default function EventForm({ onCancel }) {
             required
           />
         </div>
+        
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Category
+          <label htmlFor="registrationDeadline" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Registration Deadline
           </label>
           <input
-            type="text"
+            type="datetime-local"
+            id="registrationDeadline"
+            name="registrationDeadline"
+            value={formData.registrationDeadline}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-100 dark:bg-gray-800 p-2"
+          />
+          <p className="text-xs text-gray-500 mt-1">If not provided, defaults to 1 hour before event time</p>
+        </div>
+        
+        <div>
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Category *
+          </label>
+          <select
             id="category"
             name="category"
             value={formData.category}
             onChange={handleInputChange}
             className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-100 dark:bg-gray-800 p-2"
             required
-          />
+          >
+            <option value="">Select Category</option>
+            <option value="Workshop">Workshop</option>
+            <option value="Seminar">Seminar</option>
+            <option value="Conference">Conference</option>
+            <option value="Cultural">Cultural</option>
+            <option value="Sports">Sports</option>
+            <option value="Technical">Technical</option>
+            <option value="Social">Social</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
+        
         <div>
           <label htmlFor="organizingClub" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Organizing Club
+            Organizing Club *
           </label>
           <input
             type="text"
@@ -179,11 +216,13 @@ export default function EventForm({ onCancel }) {
             required
           />
         </div>
+        
         {error && (
           <div className="text-red-500 text-sm mt-2">
             Error: {error}
           </div>
         )}
+        
         <div className="flex justify-end space-x-2 pt-4">
           <button
             type="button"

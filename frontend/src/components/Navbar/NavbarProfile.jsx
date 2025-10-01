@@ -1,7 +1,7 @@
 import React, { useState, useContext, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
-
+import api from "../../lib/api";
 const NavbarProfile = () => {
     const { user, setUser } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -22,12 +22,35 @@ const NavbarProfile = () => {
             document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem("token"); // Remove token
-        setUser(null); // Clear user state
-        navigate("/"); // Redirect to home
-    };
-
+    const handleLogout = async () => {
+    try {
+        const token = localStorage.getItem("token");
+        
+        // Call logout endpoint if token exists
+        if (token) {
+            await api.post("/auth/logout", {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+        }
+    } catch (error) {
+        console.error("Logout API call failed:", error);
+    } finally {
+        // Clear client-side storage regardless of API call result
+        localStorage.removeItem("token");
+        
+        // Clear cookies
+        document.cookie.split(";").forEach((cookie) => {
+            const eqPos = cookie.indexOf("=");
+            const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        });
+        
+        setUser(null);
+        navigate("/");
+    }
+};
     if (!user) {
         return null;
     }
