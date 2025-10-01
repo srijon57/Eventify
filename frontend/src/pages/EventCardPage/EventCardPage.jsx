@@ -45,7 +45,6 @@ export default function EventPage() {
                 const eventData = response.data.data;
                 setEvent(eventData);
                 
-                // Initialize edit form data
                 setEditFormData({
                     title: eventData.title,
                     description: eventData.description,
@@ -59,12 +58,10 @@ export default function EventPage() {
                     image: null,
                 });
                 
-                // Check if current user is the owner
                 if (user && eventData.createdBy?._id === user._id) {
                     setIsOwner(true);
                 }
                 
-                // Check if user is already registered
                 await checkUserRegistration();
             } else {
                 setEvent(null);
@@ -122,7 +119,6 @@ export default function EventPage() {
             const token = localStorage.getItem("token");
             const data = new FormData();
             
-            // Append only changed fields
             if (editFormData.title !== event.title) data.append('title', editFormData.title);
             if (editFormData.description !== event.description) data.append('description', editFormData.description);
             if (editFormData.location !== event.location) data.append('location', editFormData.location);
@@ -154,7 +150,6 @@ export default function EventPage() {
                 setMessage("✅ Event updated successfully!");
                 setEvent(response.data.data);
                 setIsEditing(false);
-                // Refresh the event data
                 fetchEvent();
             }
         } catch (err) {
@@ -238,7 +233,7 @@ export default function EventPage() {
         }
     };
 
-    // Handle event deletion (for event owner)
+    // Handle event deletion
     const handleDeleteEvent = async () => {
         if (!window.confirm("Are you sure you want to delete this event?")) return;
 
@@ -260,7 +255,7 @@ export default function EventPage() {
         }
     };
 
-    // View registered users (for event owner)
+    // View registered users
     const handleViewRegisteredUsers = () => {
         navigate(`/events/${id}/participants`);
     };
@@ -283,136 +278,97 @@ export default function EventPage() {
         setMessage(null);
     };
 
-    if (loading) return <p className="text-center mt-20">Loading event...</p>;
-    if (!event) return <p className="text-center mt-20">Event not found</p>;
+    if (loading) return <p className="text-center mt-20 text-xl text-gray-500 dark:text-gray-400">Loading event...</p>;
+    if (!event) return <p className="text-center mt-20 text-xl text-red-500 dark:text-red-400">Event not found</p>;
 
     const isRegistrationClosed = new Date() > new Date(event.registrationDeadline || new Date(event.eventTime).getTime() - 60 * 60 * 1000);
 
     return (
-        <div className="flex flex-col items-center min-h-screen p-4 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-50">
-            <div className="w-full max-w-2xl px-6 py-8 bg-white dark:bg-gray-900 rounded-lg shadow-xl space-y-6">
-                {/* Event Owner Actions */}
-                {isOwner && !isEditing && (
-                    <div className="flex gap-2 justify-end">
-                        <button
-                            onClick={handleViewRegisteredUsers}
-                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                        >
-                            View Participants
-                        </button>
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
-                        >
-                            Edit Event
-                        </button>
-                        <button
-                            onClick={handleDeleteEvent}
-                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-                        >
-                            Delete Event
-                        </button>
-                    </div>
-                )}
-
+        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+            <div className="w-full max-w-3xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-8 space-y-8">
                 {isEditing ? (
-                    /* Edit Form */
-                    <div className="space-y-4">
-                        <h1 className="text-3xl font-bold text-center">Edit Event</h1>
+                    <div className="space-y-6">
+                        <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white">Edit Event</h1>
                         
-                        <form onSubmit={handleUpdateEvent} className="space-y-4">
+                        <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Event Title *
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Event Title *</label>
                                 <input
                                     type="text"
                                     name="title"
                                     value={editFormData.title}
                                     onChange={handleEditInputChange}
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Description *
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description *</label>
                                 <textarea
                                     name="description"
                                     value={editFormData.description}
                                     onChange={handleEditInputChange}
-                                    rows="3"
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
+                                    rows="4"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Update Image
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Update Image</label>
                                 <input
                                     type="file"
                                     name="image"
                                     accept="image/*"
                                     onChange={handleEditInputChange}
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white file:hover:bg-indigo-700 transition"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Leave empty to keep current image</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Leave empty to keep current image</p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Location *
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location *</label>
                                 <input
                                     type="text"
                                     name="location"
                                     value={editFormData.location}
                                     onChange={handleEditInputChange}
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Event Date & Time *
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Event Date & Time *</label>
                                 <input
                                     type="datetime-local"
                                     name="eventTime"
                                     value={editFormData.eventTime}
                                     onChange={handleEditInputChange}
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Registration Deadline
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Registration Deadline</label>
                                 <input
                                     type="datetime-local"
                                     name="registrationDeadline"
                                     value={editFormData.registrationDeadline}
                                     onChange={handleEditInputChange}
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Category *
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category *</label>
                                 <select
                                     name="category"
                                     value={editFormData.category}
                                     onChange={handleEditInputChange}
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                                     required
                                 >
                                     <option value="workshop">Workshop</option>
@@ -427,203 +383,209 @@ export default function EventPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Organizing Club *
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Organizing Club *</label>
                                 <input
                                     type="text"
                                     name="organizingClub"
                                     value={editFormData.organizingClub}
                                     onChange={handleEditInputChange}
-                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                                     required
                                 />
                             </div>
 
-                            <div className="flex gap-2 pt-4">
+                            <div className="flex gap-4 pt-4">
                                 <button
                                     type="button"
                                     onClick={handleCancelEdit}
-                                    className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                    className="flex-1 px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    type="submit"
-                                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                                    type="button"
+                                    onClick={handleUpdateEvent}
+                                    className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
                                 >
                                     Update Event
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 ) : (
-                    /* Event Display */
                     <>
-                        <h1 className="text-3xl font-bold text-center">
-                            {event.title}
-                        </h1>
+                        <div className="space-y-6">
+                            <h1 className="text-4xl font-extrabold text-center text-gray-900 dark:text-white">{event.title}</h1>
 
-                        <div className="rounded-lg overflow-hidden shadow-md">
-                            <img
-                                src={
-                                    event.image ||
-                                    "https://placehold.co/600x400/333333/FFFFFF?text=Image+Not+Found"
-                                }
-                                alt={event.title}
-                                className="w-full h-64 object-cover"
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src =
-                                        "https://placehold.co/600x400/333333/FFFFFF?text=Image+Not+Found";
-                                }}
-                            />
-                        </div>
-
-                        <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm">
-                            <p className="text-lg text-gray-700 dark:text-gray-300">
-                                {event.description}
-                            </p>
-                        </div>
-
-                        <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                            <p>
-                                <strong>Category:</strong> {event.category}
-                            </p>
-                            <p>
-                                <strong>Organized by:</strong> {event.organizingClub}
-                            </p>
-                            <p>
-                                <strong>Participants:</strong> {event.participantsCount}
-                            </p>
-                            <p>
-                                <strong>Views:</strong> {event.viewsCount || 0}
-                            </p>
-                            <p>
-                                <strong>Date & Time:</strong>{" "}
-                                {new Date(event.eventTime).toLocaleString()}
-                            </p>
-                            {event.registrationDeadline && (
-                                <p>
-                                    <strong>Registration Deadline:</strong>{" "}
-                                    {new Date(event.registrationDeadline).toLocaleString()}
-                                    {isRegistrationClosed && (
-                                        <span className="text-red-500 ml-2">(Closed)</span>
-                                    )}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="flex items-center gap-3 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm">
-                            <img
-                                src={event.createdBy?.profileImage || "https://placehold.co/40x40?text=U"}
-                                alt={event.createdBy?.username}
-                                className="w-12 h-12 rounded-full object-cover"
-                            />
-                            <div>
-                                <p className="font-semibold">
-                                    {event.createdBy?.username || "Unknown User"}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                    {event.createdBy?.email || ""}
-                                </p>
+                            <div className="rounded-2xl overflow-hidden shadow-lg">
+                                <img
+                                    src={
+                                        event.image ||
+                                        "https://placehold.co/600x400/333333/FFFFFF?text=Image+Not+Found"
+                                    }
+                                    alt={event.title}
+                                    className="w-full h-80 object-cover"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src =
+                                            "https://placehold.co/600x400/333333/FFFFFF?text=Image+Not+Found";
+                                    }}
+                                />
                             </div>
-                        </div>
 
-                        {/* Registration Section */}
-                        {user ? (
-                            <div className="space-y-3">
-                                {isRegistered ? (
-                                    <button
-                                        onClick={handleUnregister}
-                                        disabled={unregistering}
-                                        className="w-full px-4 py-3 bg-red-600 rounded-lg shadow-sm hover:bg-red-700 focus:outline-none text-white font-medium disabled:opacity-50"
-                                    >
-                                        {unregistering ? "Unregistering..." : "Unregister from Event"}
-                                    </button>
-                                ) : (
+                            <div className="p-6 bg-gray-100 dark:bg-gray-800 rounded-2xl shadow-md">
+                                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">{event.description}</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 dark:text-gray-300">
+                                <div>
+                                    <p><strong>Category:</strong> <span className="capitalize">{event.category}</span></p>
+                                    <p><strong>Organized by:</strong> {event.organizingClub}</p>
+                                    <p><strong>Participants:</strong> {event.participantsCount}</p>
+                                    <p><strong>Views:</strong> {event.viewsCount || 0}</p>
+                                </div>
+                                <div>
+                                    <p><strong>Date & Time:</strong> {new Date(event.eventTime).toLocaleString()}</p>
+                                    {event.registrationDeadline && (
+                                        <p>
+                                            <strong>Registration Deadline:</strong>{" "}
+                                            {new Date(event.registrationDeadline).toLocaleString()}
+                                            {isRegistrationClosed && (
+                                                <span className="text-red-500 ml-2 font-semibold">(Closed)</span>
+                                            )}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-2xl shadow-md">
+                                <img
+                                    src={event.createdBy?.profileImage || "https://placehold.co/40x40?text=U"}
+                                    alt={event.createdBy?.username}
+                                    className="w-14 h-14 rounded-full object-cover border-2 border-indigo-500"
+                                />
+                                <div>
+                                    <p className="font-semibold text-gray-900 dark:text-white">{event.createdBy?.username || "Unknown User"}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{event.createdBy?.email || ""}</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                {user ? (
                                     <>
-                                        {isRegistrationClosed ? (
+                                        {isRegistered ? (
                                             <button
-                                                disabled
-                                                className="w-full px-4 py-3 bg-gray-400 rounded-lg shadow-sm text-white font-medium cursor-not-allowed"
+                                                onClick={handleUnregister}
+                                                disabled={unregistering}
+                                                className="w-full px-6 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 focus:outline-none font-semibold disabled:opacity-50 transition"
                                             >
-                                                Registration Closed
+                                                {unregistering ? "Unregistering..." : "Unregister from Event"}
                                             </button>
                                         ) : (
-                                            <button
-                                                onClick={() => setShowRegisterForm(true)}
-                                                disabled={registering}
-                                                className="w-full px-4 py-3 bg-green-600 rounded-lg shadow-sm hover:bg-green-700 focus:outline-none text-white font-medium disabled:opacity-50"
-                                            >
-                                                {registering ? "Registering..." : "Register for Event"}
-                                            </button>
+                                            <>
+                                                {isRegistrationClosed ? (
+                                                    <button
+                                                        disabled
+                                                        className="w-full px-6 py-3 bg-gray-400 text-white rounded-lg shadow-md font-semibold cursor-not-allowed"
+                                                    >
+                                                        Registration Closed
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setShowRegisterForm(true)}
+                                                        disabled={registering}
+                                                        className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none font-semibold disabled:opacity-50 transition"
+                                                    >
+                                                        {registering ? "Registering..." : "Register for Event"}
+                                                    </button>
+                                                )}
+                                            </>
+                                        )}
+
+                                        {showRegisterForm && (
+                                            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+                                                <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 w-full max-w-md space-y-6 shadow-xl">
+                                                    <h2 className="text-2xl font-semibold text-center text-gray-900 dark:text-white">Register for Event</h2>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Student ID"
+                                                        value={studentId}
+                                                        onChange={(e) => setStudentId(e.target.value)}
+                                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Department"
+                                                        value={department}
+                                                        onChange={(e) => setDepartment(e.target.value)}
+                                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                                                    />
+                                                    <div className="flex justify-between gap-4">
+                                                        <button
+                                                            onClick={() => setShowRegisterForm(false)}
+                                                            className="flex-1 px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button
+                                                            onClick={handleRegister}
+                                                            disabled={registering}
+                                                            className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition"
+                                                        >
+                                                            {registering ? "Registering..." : "Submit"}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         )}
                                     </>
+                                ) : (
+                                    <button
+                                        onClick={() => navigate("/login")}
+                                        className="w-full px-6 py-3 bg-gray-600 text-white rounded-lg shadow-md hover:bg-gray-700 focus:outline-none font-semibold transition"
+                                    >
+                                        Login to Register
+                                    </button>
                                 )}
 
-                                {/* Registration form modal */}
-                                {showRegisterForm && (
-                                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                        <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-80 space-y-4">
-                                            <h2 className="text-xl font-semibold text-center">
-                                                Register for Event
-                                            </h2>
-                                            <input
-                                                type="text"
-                                                placeholder="Student ID"
-                                                value={studentId}
-                                                onChange={(e) => setStudentId(e.target.value)}
-                                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50"
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Department"
-                                                value={department}
-                                                onChange={(e) => setDepartment(e.target.value)}
-                                                className="w-full px-3 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50"
-                                            />
-                                            <div className="flex justify-between gap-2">
-                                                <button
-                                                    onClick={() => setShowRegisterForm(false)}
-                                                    className="flex-1 px-4 py-2 bg-gray-500 rounded-lg text-white hover:bg-gray-600"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    onClick={handleRegister}
-                                                    disabled={registering}
-                                                    className="flex-1 px-4 py-2 bg-green-600 rounded-lg text-white hover:bg-green-700 disabled:opacity-50"
-                                                >
-                                                    {registering ? "Registering..." : "Submit"}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                                <a
+                                    href={event.location}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block w-full text-center px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none font-semibold transition"
+                                >
+                                    📍 View on Map
+                                </a>
                             </div>
-                        ) : (
-                            <button
-                                onClick={() => navigate("/login")}
-                                className="w-full px-4 py-3 bg-gray-600 rounded-lg shadow-sm hover:bg-gray-700 focus:outline-none text-white font-medium"
-                            >
-                                Login to Register
-                            </button>
-                        )}
 
-                        <a
-                            href={event.location}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block w-full text-center px-4 py-3 bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none text-white font-medium"
-                        >
-                            📍 View on Map
-                        </a>
+                            {isOwner && (
+                                <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                                    <button
+                                        onClick={handleViewRegisteredUsers}
+                                        className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
+                                    >
+                                        View Participants
+                                    </button>
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        className="flex-1 px-6 py-3 bg-yellow-600 text-white rounded-lg shadow-md hover:bg-yellow-700 transition"
+                                    >
+                                        Edit Event
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteEvent}
+                                        className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition"
+                                    >
+                                        Delete Event
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </>
                 )}
 
                 {message && (
-                    <p className="text-center mt-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <p className="text-center text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
                         {message}
                     </p>
                 )}
