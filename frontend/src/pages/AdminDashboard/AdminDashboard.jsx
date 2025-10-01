@@ -1,23 +1,46 @@
-// src/pages/admin/AdminDashboard.jsx
-
-import React, { useState } from 'react';
- // Import the new EventForm component
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from "../../lib/api";
 import EventForm from './../EventForm/EventForm';
-
-// This is just mock data to simulate events created by the admin, now with categories
-const createdEvents = [
-  { id: 1, name: 'Tech Meetup 2024', description: 'Join us for a day of innovation and networking.', category: 'Tech' },
-  { id: 2, name: 'Web Dev Workshop', description: 'Learn the latest trends in web development.', category: 'Tech' },
-  { id: 3, name: 'Creative Writing Workshop', description: 'Unleash your inner writer.', category: 'Art & Culture' },
-  { id: 4, name: 'AI & Machine Learning', description: 'An introduction to AI, with hands-on labs.', category: 'Tech' },
-  { id: 5, name: 'Photography Basics', description: 'Learn to take stunning photos.', category: 'Art & Culture' },
-  { id: 6, name: 'Cybersecurity Conference', description: 'Explore the future of digital security.', category: 'Tech' },
-  { id: 7, name: 'UI/UX Design Masterclass', description: 'Master the principles of user-centric design.', category: 'Design' },
-];
 
 export default function AdminDashboard() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showEventForm, setShowEventForm] = useState(false);
+  const [createdEvents, setCreatedEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  // Fetch admin's created events
+  const fetchAdminEvents = async (category = 'All') => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token'); // or your token storage method
+      
+      const params = {};
+      if (category !== 'All') {
+        params.category = category;
+      }
+
+      const response = await api.get("/events/admin/created-events", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        params
+      });
+
+      if (response.data && response.data.data) {
+        setCreatedEvents(response.data.data.events);
+      }
+    } catch (err) {
+      console.error('Error fetching admin events:', err);
+      setError('Failed to fetch events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdminEvents(selectedCategory);
+  }, [selectedCategory]);
 
   const handlePostEvent = () => {
     setShowEventForm(true);
@@ -25,10 +48,16 @@ export default function AdminDashboard() {
   
   const handleCancelForm = () => {
     setShowEventForm(false);
+    // Refresh events after form cancellation (in case new event was created elsewhere)
+    fetchAdminEvents(selectedCategory);
   };
   
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
+  };
+
+  const handleEventClick = (eventId) => {
+    navigate(`/eventpage/${eventId}`);
   };
 
   const filteredEvents = createdEvents.filter(event => {
@@ -41,7 +70,7 @@ export default function AdminDashboard() {
   return (
     <div className="flex flex-col items-center min-h-screen p-4 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-50">
       {showEventForm ? (
-        <EventForm onCancel={handleCancelForm} />
+        <EventForm onCancel={handleCancelForm} onSuccess={handleCancelForm} />
       ) : (
         <div className="w-full max-w-2xl px-6 py-8 bg-white dark:bg-gray-900 rounded-lg shadow-xl">
           {/* Header and Buttons */}
@@ -72,17 +101,46 @@ export default function AdminDashboard() {
                 <option value="Tech">Tech</option>
                 <option value="Design">Design</option>
                 <option value="Art & Culture">Art & Culture</option>
+                <option value="Workshop">Workshop</option>
+                <option value="Sports">Sports</option>
+                {/* Add more categories as needed */}
               </select>
             </div>
           </div>
           
           <div className="h-[400px] w-full overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700 p-4 space-y-4">
-            {filteredEvents.length > 0 ? (
+            {loading ? (
+              <p className="text-center text-gray-500 dark:text-gray-400">Loading events...</p>
+            ) : error ? (
+              <p className="text-center text-red-500 dark:text-red-400">{error}</p>
+            ) : filteredEvents.length > 0 ? (
               filteredEvents.map(event => (
-                <div key={event.id} className="w-full bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm p-4 flex items-center space-x-4">
-                  <div>
-                    <h3 className="text-lg font-medium">{event.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{event.description}</p>
+                <div 
+                  key={event._id} 
+                  onClick={() => handleEventClick(event._id)}
+                  className="w-full bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm p-4 flex items-center space-x-4 cursor-pointer transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-700 hover:shadow-md"
+                >
+                  {event.image && (
+                    <img 
+                      src={event.image} 
+                      alt={event.title}
+                      className="w-16 h-16 object-cover rounded-md"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium">{event.title}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                      {event.description}
+                    </p>
+                    <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                      <span>📍 {event.location}</span>
+                      <span>🕒 {new Date(event.eventTime).toLocaleString()}</span>
+                      <span>👥 {event.participantsCount} participants</span>
+                      <span>👁️ {event.viewsCount} views</span>
+                    </div>
+                    <span className="inline-block mt-2 px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
+                      {event.category}
+                    </span>
                   </div>
                 </div>
               ))

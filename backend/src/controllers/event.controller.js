@@ -496,7 +496,43 @@ const getPassedEvent = asyncHandler(async (req, res) => {
             )
         );
 });
+const getAdminEvents = asyncHandler(async (req, res) => {
+    const { category, page = 1, limit = 10 } = req.query;
+    const adminId = req.user._id;
 
+    let filter = { createdBy: adminId };
+    
+    if (category && category !== 'All') {
+        filter.category = category;
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const totalEvents = await Event.countDocuments(filter);
+
+    const events = await Event.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .populate("createdBy", "username profileImage email")
+        .select("title description image location eventTime category organizingClub participantsCount viewsCount createdAt");
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                events,
+                pagination: {
+                    total: totalEvents,
+                    page: parseInt(page),
+                    limit: parseInt(limit),
+                    totalPages: Math.ceil(totalEvents / limit),
+                },
+            },
+            "Admin events fetched successfully"
+        )
+    );
+});
 export {
     createEvent,
     updateEvent,
@@ -509,4 +545,5 @@ export {
     getRegisteredEventsForUser,
     sendEventEmail,
     getPassedEvent,
+    getAdminEvents,
 };

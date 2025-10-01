@@ -10,7 +10,8 @@ import {
     getAllRegisteredUsersForEvent,
     getRegisteredEventsForUser,
     sendEventEmail,
-    getPassedEvent
+    getPassedEvent,
+    getAdminEvents,
 } from "../controllers/event.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -31,6 +32,8 @@ router.route("/registered-events")
 router.route("/passed-events")
     .get(verifyJWT, getPassedEvent);
 
+router.route("/admin/created-events")
+    .get(verifyJWT, getAdminEvents);
 
 // Requires ID
 router.route("/:id") 
