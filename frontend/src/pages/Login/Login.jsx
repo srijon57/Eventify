@@ -9,9 +9,11 @@ const Login = () => {
     const { setUser } = useContext(AuthContext);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
         try {
             const res = await api.post("/auth/login", { email, password });
             localStorage.setItem("token", res.data.data.accessToken);
@@ -20,6 +22,8 @@ const Login = () => {
             navigate("/");
         } catch (err) {
             alert(err.response?.data?.message || "Login failed");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -82,6 +86,7 @@ const Login = () => {
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
                             required
+                            disabled={isLoading}
                         />
                     </div>
                     <div>
@@ -94,10 +99,18 @@ const Login = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
                             required
+                            disabled={isLoading}
                         />
                     </div>
-                    <Button type="submit" className="w-full py-2 text-lg">
-                        Login
+                    <Button type="submit" className="w-full py-2 text-lg" disabled={isLoading}>
+                        {isLoading ? (
+                            <div className="flex items-center justify-center space-x-2">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                <span>Logging in...</span>
+                            </div>
+                        ) : (
+                            "Login"
+                        )}
                     </Button>
                 </form>
                 <div className="mt-4">
